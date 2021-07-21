@@ -75,10 +75,9 @@ bool IsAppValid()
 uint64_t GetSysParamTags()
 {
     // Get the system parameters of KEY_TRACE_TAG.
-    std::string tagStr = OHOS::system::GetParameter(KEY_TRACE_TAG, "");
-    uint64_t tags = std::stoull(tagStr);
-    if (tagStr == "" || tags == ULLONG_MAX) {
-        fprintf(stderr, "GetSysParamTags error tag: %s.\n", tagStr.c_str());
+    uint64_t tags = OHOS::system::GetUintParameter<uint64_t>(KEY_TRACE_TAG, 0);
+    if (tags == 0) {
+        fprintf(stderr, "GetUintParameter %s error.\n", KEY_TRACE_TAG.c_str());
         return 0;
     }
 
