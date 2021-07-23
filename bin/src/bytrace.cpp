@@ -549,8 +549,8 @@ static void DumpCompressedTrace(int traceFd, int outFd)
         return;
     }
     int have;
-    unique_ptr<uint8_t> in = std::make_unique<uint8_t>(CHUNK_SIZE);
-    unique_ptr<uint8_t> out = std::make_unique<uint8_t>(CHUNK_SIZE);
+    std::unique_ptr<uint8_t[]>  in = std::make_unique<uint8_t[]>(CHUNK_SIZE);
+    std::unique_ptr<uint8_t[]>  out = std::make_unique<uint8_t[]>(CHUNK_SIZE);
     int flush = Z_NO_FLUSH;
     if (!in || !out) {
         fprintf(stderr, "Error: couldn't allocate buffers.\n");
