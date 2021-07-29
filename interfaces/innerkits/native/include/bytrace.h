@@ -22,7 +22,6 @@
 extern "C" {
 #endif
 
-__BEGIN_DECLS
 
 constexpr uint64_t BYTRACE_TAG_NEVER = 0; // This tag is never enabled.
 constexpr uint64_t BYTRACE_TAG_ALWAYS = (1ULL << 0); // This tag is always enabled.
@@ -97,7 +96,6 @@ void MiddleTraceDebug(uint64_t label, const std::string& beforeValue, const std:
 void CountTrace(uint64_t label, const std::string& name, int64_t count);
 void CountTraceDebug(uint64_t label, const std::string& name, int64_t count);
 
-__END_DECLS
 #ifdef __cplusplus
 }
 #endif
