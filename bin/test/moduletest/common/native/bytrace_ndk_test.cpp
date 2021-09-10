@@ -400,7 +400,7 @@ vector<string> ReadTrace()
  * @tc.desc: tracing_mark_write file node normal output start tracing and end tracing.
  * @tc.type: FUNC
  */
-HWTEST_F(BytraceNDKTest, StartTrace_001, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_001, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
@@ -419,7 +419,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_001, TestSize.Level1)
  * @tc.desc: tracing_mark_write file node has no output.
  * @tc.type: FUNC
  */
-HWTEST_F(BytraceNDKTest, StartTrace_002, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_002, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
@@ -438,7 +438,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_002, TestSize.Level1)
   * @tc.desc: tracing_mark_write file node normal output start trace and end trace.
   * @tc.type: FUNC
   */
-HWTEST_F(BytraceNDKTest, StartTrace_003, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_003, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
@@ -465,7 +465,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_003, TestSize.Level1)
  * @tc.desc: test Input and output interval 1ms execution, time fluctuation 1ms
  * @tc.type: FUNC
  */
-HWTEST_F(BytraceNDKTest, StartTrace_004, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_004, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
@@ -485,7 +485,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_004, TestSize.Level1)
  * @tc.desc: tracing_mark_write file node normal output start trace and end trace
  * @tc.type: FUNC
  */
-HWTEST_F(BytraceNDKTest, StartTrace_005, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_005, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
@@ -505,7 +505,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_005, TestSize.Level1)
  * @tc.desc: tracing_mark_write file node normal output start trace and end trace
  * @tc.type: FUNC
  */
-HWTEST_F(BytraceNDKTest, StartTrace_006, TestSize.Level1)
+HWTEST_F(BytraceNDKTest, StartTrace_006, TestSize.Level0)
 {
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
