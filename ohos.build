@@ -21,7 +21,7 @@
         }
       ],
        "test_list": [
-        "//developtools/bytrace_standard/bin/test:moduletest"
+        "//developtools/bytrace_standard/bin/test:unittest"
       ]
     }
   }

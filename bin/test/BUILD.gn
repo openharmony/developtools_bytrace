@@ -20,9 +20,9 @@ config("module_private_config") {
   visibility = [ ":*" ]
 }
 
-ohos_moduletest("BytraceNDKTest") {
+ohos_unittest("BytraceNDKTest") {
   module_out_path = module_output_path
-  sources = [ "moduletest/common/native/bytrace_ndk_test.cpp" ]
+  sources = [ "unittest/common/native/bytrace_ndk_test.cpp" ]
   deps = [
     "${bytrace_path}/bin:bytrace_capture_inner",
     "${innerkits_path}/native:bytrace_core",
@@ -35,7 +35,7 @@ ohos_moduletest("BytraceNDKTest") {
   include_dirs = [ "${innerkits_path}/bytrace/bytrace_native/include" ]
 }
 
-group("moduletest") {
+group("unittest") {
   testonly = true
   deps = [ ":BytraceNDKTest" ]
 }
