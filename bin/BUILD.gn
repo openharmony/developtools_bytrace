@@ -27,7 +27,7 @@ ohos_static_library("bytrace_inner") {
     "ipc:ipc_core",
     "startup_l2:syspara",
 
-    #"distributedschedule:samgr_L2"
+    #"distributedschedule:samgr_standard"
   ]
 }
 
