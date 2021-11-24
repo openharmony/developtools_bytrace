@@ -22,6 +22,7 @@
 #include <vector>
 #include "bytrace.h"
 #include "hilog/log.h"
+#include "parameter.h"
 #include "parameters.h"
 
 using namespace std;
@@ -44,6 +45,15 @@ const std::string KEY_RO_DEBUGGABLE = "ro.debuggable";
 constexpr int NAME_MAX_SIZE = 1000;
 static std::vector<std::string> g_markTypes = {"B", "E", "S", "F", "C"};
 enum MarkerType { MARKER_BEGIN, MARKER_END, MARKER_ASYNC_BEGIN, MARKER_ASYNC_END, MARKER_INT, MARKER_MAX };
+
+constexpr uint64_t BYTRACE_TAG = 0xd03301;
+constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, BYTRACE_TAG, "BytraceCore"};
+
+static void ParameterChange(const char* key, const char* value, void* context)
+{
+    HiLog::Info(LABEL, "ParameterChange %{public}s", key);
+    UpdateTraceLabel();
+}
 
 bool IsAppValid()
 {
@@ -94,12 +104,17 @@ void OpenTraceMarkerFile()
     if (g_markerFd == -1) {
         g_markerFd = open(traceFile.c_str(), O_WRONLY | O_CLOEXEC);
         if (g_markerFd == -1) {
-            fprintf(stderr, "Error opening trace file.\n");
+            HiLog::Error(LABEL, "open trace file %{public}s failed: %{public}s", traceFile.c_str(), strerror(errno));
             g_tagsProperty = 0;
             return;
         }
     }
     g_tagsProperty = GetSysParamTags();
+
+    if (WatchParameter(KEY_TRACE_TAG.c_str(), ParameterChange, nullptr) != 0) {
+        HiLog::Error(LABEL, "WatchParameter %{public}s failed", KEY_TRACE_TAG.c_str());
+        return;
+    }
     g_isBytraceInit = true;
 }
 }; // namespace

@@ -26,6 +26,7 @@ ohos_static_library("bytrace_inner") {
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "startup_l2:syspara",
+    "startup_l2:syspara_watchagent",
 
     #"distributedschedule:samgr_standard"
   ]
@@ -69,16 +70,23 @@ ohos_executable("bytrace") {
 }
 
 ohos_prebuilt_etc("bytrace.cfg") {
-  if (use_musl) {
-    source = "./config/bytrace.cfg"
-  } else {
-    source = "./config/bytrace.rc"
-  }
+  source = "./config/bytrace.cfg"
   relative_install_dir = "init"
   subsystem_name = "developtools"
   part_name = "bytrace_standard"
 }
 
+ohos_executable("bytrace_example") {
+  sources = [ "example/bytrace_example.cpp" ]
+  deps = [ "${innerkits_path}/native:bytrace_core" ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  subsystem_name = "developtools"
+  part_name = "bytrace_standard"
+}
+
 group("bytrace_target") {
-  deps = [ ":bytrace" ]
+  deps = [
+    ":bytrace",
+    ":bytrace_example",
+  ]
 }
