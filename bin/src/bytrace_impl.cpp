@@ -156,12 +156,12 @@ void StartTraceDebug(uint64_t label, const string& value, float limit)
 #endif
 }
 
-void FinishTrace(uint64_t label, const string& value)
+void FinishTrace(uint64_t label)
 {
     AddBytraceMarker(MARKER_END, label, "", "");
 }
 
-void FinishTraceDebug(uint64_t label, const string& value)
+void FinishTraceDebug(uint64_t label)
 {
 #if (TRACE_LEVEL >= DEBUG_LEVEL)
     AddBytraceMarker(MARKER_END, label, "", "");

@@ -57,7 +57,7 @@ int main()
 
     StartTrace(label, "func1Start", 1); // 打印起始点
     func1();
-    FinishTrace(label, "");
+    FinishTrace(label);
     sleep(2);
 
     thread t2(threadFunc2);
@@ -65,11 +65,11 @@ int main()
 
     StartTrace(label, "func2Start", 2);
     func2();
-    FinishTrace(label, "");
+    FinishTrace(label);
     sleep(2);
 
     sleep(1);
-    FinishTrace(label, "");
+    FinishTrace(label);
     func3();
 
     return 0;

@@ -405,7 +405,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_001, TestSize.Level0)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TAG, "StartTraceTest001");
-    FinishTrace(TAG, "StartTraceTest001");
+    FinishTrace(TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest001) ", list);
@@ -424,7 +424,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_002, TestSize.Level0)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TAG, "StartTraceTest002");
-    FinishTrace(TAG, "StartTraceTest002");
+    FinishTrace(TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest002) ", list);
@@ -443,7 +443,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_003, TestSize.Level0)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TAG, "StartTraceTest003 %s");
-    FinishTrace(TAG, "StartTraceTest003 %s");
+    FinishTrace(TAG);
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest003 %s) ", list);
     ASSERT_TRUE(startTrace.IsLoaded()) << "Can't find \"B|pid|StartTraceTest003 %s\" from trace.";
@@ -452,7 +452,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_003, TestSize.Level0)
     ASSERT_TRUE(CleanTrace());
     list.clear();
     StartTrace(TAG, "StartTraceTest003 %p");
-    FinishTrace(TAG, "StartTraceTest003 %p");
+    FinishTrace(TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     list = ReadTrace();
     MyTrace startTrace2 = GetTraceResult(TRACE_START + "(StartTraceTest003 %p) ", list);
@@ -471,7 +471,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_004, TestSize.Level0)
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TAG, "StartTraceTest004");
     usleep(1000);
-    FinishTrace(TAG, "StartTraceTest004");
+    FinishTrace(TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest004) ", list);
@@ -526,7 +526,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_007, TestSize.Level1)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TRACE_INVALIDATE_TAG, "StartTraceTest007");
-    FinishTrace(TRACE_INVALIDATE_TAG, "StartTraceTest007");
+    FinishTrace(TRACE_INVALIDATE_TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest007)", list);
@@ -545,7 +545,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_008, TestSize.Level1)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTrace(TRACE_INVALIDATE_TAG, "StartTraceTest008 %s");
-    FinishTrace(TRACE_INVALIDATE_TAG, "StartTraceTest008 %s");
+    FinishTrace(TRACE_INVALIDATE_TAG);
     vector<string> list = ReadTrace();
     MyTrace startTrace = GetTraceResult(TRACE_START + "(StartTraceTest008 %s)", list);
     EXPECT_FALSE(startTrace.IsLoaded()) << "Can't find \"B|pid|StartTraceTest008 %s\" from trace.";
@@ -554,7 +554,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_008, TestSize.Level1)
     ASSERT_TRUE(CleanTrace());
     list.clear();
     StartTrace(TRACE_INVALIDATE_TAG, "StartTraceTest008 %p");
-    FinishTrace(TRACE_INVALIDATE_TAG, "StartTraceTest008 %p");
+    FinishTrace(TRACE_INVALIDATE_TAG);
     ASSERT_TRUE(SetFtrace(TRACING_ON, false)) << "Setting tracing_on failed.";
     list = ReadTrace();
     MyTrace startTrace2 = GetTraceResult(TRACE_START + "(StartTraceTest008 %p)", list);
@@ -608,7 +608,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_011, TestSize.Level1)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTraceDebug(TAG, "StartTraceTest011");
-    FinishTraceDebug(TAG, "StartTraceTest011");
+    FinishTraceDebug(TAG);
 }
 
 /**
@@ -621,7 +621,7 @@ HWTEST_F(BytraceNDKTest, StartTrace_012, TestSize.Level1)
     ASSERT_TRUE(CleanTrace());
     ASSERT_TRUE(SetFtrace(TRACING_ON, true)) << "Setting tracing_on failed.";
     StartTraceDebug(TAG, "StartTraceTest012 %s");
-    FinishTraceDebug(TAG, "StartTraceTest012 %s");
+    FinishTraceDebug(TAG);
 }
 
 /**

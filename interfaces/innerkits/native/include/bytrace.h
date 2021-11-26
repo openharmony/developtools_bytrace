@@ -70,8 +70,8 @@ void StartTraceDebug(uint64_t label, const std::string& value, float limit = -1)
 /**
  * Track the end of a context.
  */
-void FinishTrace(uint64_t label, const std::string& value);
-void FinishTraceDebug(uint64_t label, const std::string& value);
+void FinishTrace(uint64_t label);
+void FinishTraceDebug(uint64_t label);
 /**
  * Track the beginning of an asynchronous event.
  */
