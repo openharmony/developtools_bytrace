@@ -60,8 +60,8 @@ declare namespace bytrace {
    * This method is invoked at the end of a transaction to indicate that a task has ended, whose name
    * is specified by {@code name}. This method must be invoked after the the startTrace.
    *
-   * @param name Indicates the task name. It must be the same whith the {@code name} of startTrace.
-   * @param taskId The unique id used to distinguish the tasks and must be the same whith the .
+   * @param name Indicates the task name. It must be the same as the {@code name} of startTrace.
+   * @param taskId The unique id used to distinguish the tasks and must be the same as the .
    * {@code taskId} of startTrace.
    * @since 7
    */

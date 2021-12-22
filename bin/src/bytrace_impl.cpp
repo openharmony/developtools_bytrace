@@ -16,6 +16,7 @@
 #include <climits>
 #include <fcntl.h>
 #include <fstream>
+#include <inttypes.h>
 #include <mutex>
 #include <thread>
 #include <unistd.h>
@@ -87,7 +88,7 @@ uint64_t GetSysParamTags()
     // Get the system parameters of KEY_TRACE_TAG.
     uint64_t tags = OHOS::system::GetUintParameter<uint64_t>(KEY_TRACE_TAG, 0);
     if (tags == 0) {
-        fprintf(stderr, "GetUintParameter %s error.\n", KEY_TRACE_TAG.c_str());
+        // HiLog::Error(LABEL, "GetUintParameter %s error.\n", KEY_TRACE_TAG.c_str());
         return 0;
     }
 
@@ -130,7 +131,9 @@ inline void AddBytraceMarker(MarkerType type, uint64_t tag, std::string name, st
         record += std::to_string(getpid()) + "|";
         record += (name.size() < NAME_MAX_SIZE) ? name : name.substr(0, NAME_MAX_SIZE);
         record += " " + value;
-        write(g_markerFd, record.c_str(), record.size());
+        if (write(g_markerFd, record.c_str(), record.size()) < 0) {
+            HiLog::Error(LABEL, "write trace_marker failed, %{public}s", strerror(errno));
+        }
     }
 }
 

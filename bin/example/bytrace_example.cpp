@@ -1,76 +1,98 @@
+/*
+ * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
 #include <thread>
+
 #include "bytrace.h"
 
 using namespace std;
-constexpr uint64_t label = BYTRACE_TAG_OHOS;
+namespace {
+constexpr int SLEEP_ONE_SECOND = 1;
+constexpr int SLEEP_TWO_SECOND = 2;
+constexpr int CYCLE_TIMES = 5;
+constexpr int32_t TASK_ID = 111;
+constexpr uint64_t LABEL = BYTRACE_TAG_OHOS;
 
-void func1()
+void FuncA()
 {
-    cout << "func 1" << endl;
-    sleep(1);
+    cout << "funcA" << endl;
+    sleep(SLEEP_ONE_SECOND);
 }
 
-void func2()
+void FuncB()
 {
-    cout << "func 2" << endl;
-    sleep(2);
+    cout << "funcB" << endl;
+    sleep(SLEEP_TWO_SECOND);
 }
 
-void func3()
+void FuncC()
 {
-    cout << "func 3" << endl;
+    cout << "funcC" << endl;
     int num = 0;
-    for(int i=0; i < 5; i++) {
+    for (int i = 0; i < CYCLE_TIMES; i++) {
         CountTrace(BYTRACE_TAG_OHOS, "count number", ++num);
-        sleep(1);
+        sleep(SLEEP_ONE_SECOND);
     }
 }
 
-void threadFunc1()
+void ThreadFunc1()
 {
-    StartAsyncTrace(label, "testAsync", 1111);
-    for (int i = 0; i < 5; ++i) {
+    StartAsyncTrace(LABEL, "testAsync", TASK_ID);
+    for (int i = 0; i < CYCLE_TIMES; ++i) {
         cout << "t1" << endl;
-        sleep(1);
+        sleep(SLEEP_ONE_SECOND);
     }
 }
 
-void threadFunc2()
+void ThreadFunc2()
 {
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < CYCLE_TIMES; ++i) {
         cout << "t2" << endl;
-        sleep(1);
+        sleep(SLEEP_ONE_SECOND);
     }
-    FinishAsyncTrace(label, "testAsync", 1111);
+    FinishAsyncTrace(LABEL, "testAsync", TASK_ID);
 }
+} // namespace
 
 int main()
 {
-    thread t1(threadFunc1);
+    thread t1(ThreadFunc1);
     t1.join();
 
-    StartTrace(label, "testStart");
-    sleep(1);
+    StartTrace(LABEL, "testStart");
+    sleep(SLEEP_ONE_SECOND);
 
-    StartTrace(label, "func1Start", 1); // 打印起始点
-    func1();
-    FinishTrace(label);
-    sleep(2);
+    StartTrace(LABEL, "funcAStart", SLEEP_ONE_SECOND); // 打印起始点
+    FuncA();
+    FinishTrace(LABEL);
+    sleep(SLEEP_TWO_SECOND);
 
-    thread t2(threadFunc2);
+    thread t2(ThreadFunc2);
     t2.join();
 
-    StartTrace(label, "func2Start", 2);
-    func2();
-    FinishTrace(label);
-    sleep(2);
+    StartTrace(LABEL, "funcBStart", SLEEP_TWO_SECOND);
+    FuncB();
+    FinishTrace(LABEL);
+    sleep(SLEEP_TWO_SECOND);
 
-    sleep(1);
-    FinishTrace(label);
-    func3();
+    sleep(SLEEP_ONE_SECOND);
+    FinishTrace(LABEL);
+    FuncC();
 
     return 0;
 }

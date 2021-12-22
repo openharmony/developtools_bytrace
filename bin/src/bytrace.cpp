@@ -151,6 +151,7 @@ static bool IsTagSupported(const string& name)
         return true;
     }
 
+    bool findPath = false;
     for (int i = 0; i < MAX_SYS_FILES; i++) {
         const string path = tagCategory.sysfiles[i].path;
         if (path.size() == 0) {
@@ -158,15 +159,13 @@ static bool IsTagSupported(const string& name)
         }
         if (IsWritableFile(path)) {
             g_kernelEnabledPaths.push_back(path);
+            findPath = true;
         } else if (IsFileExit(path)) {
             fprintf(stderr, "Warning: category \"%s\" requires root "
                 "privileges.\n", name.c_str());
-            return false;
-        } else {
-            return false;
         }
     }
-    return true;
+    return findPath;
 }
 
 static string ReadFile(const string& filename)
@@ -242,7 +241,7 @@ static bool DisableAllFtraceEvents()
         }
         for (int i = 0; i < MAX_SYS_FILES; i++) {
             const string path = tag.sysfiles[i].path;
-            if (path.size() > 0 && IsWritableFile(path)) {
+            if ((path.size() > 0) && IsWritableFile(path)) {
                 isTrue = isTrue && SetFtraceEnabled(path, false);
             }
         }
@@ -322,7 +321,7 @@ static void ShowHelp(const string& cmd)
            "  --buffer_size N    Like \"-b N\".\n"
            "  -l                 Lists available bytrace categories.\n"
            "  --list_categories  Like \"-l\".\n"
-           "  -t N               Sets the bytrace running duration in seconds (5s by default), which depends on"
+           "  -t N               Sets the bytrace running duration in seconds (5s by default), which depends on \n"
            "                     the time required for analysis.\n"
            "  --time N           Like \"-t N\".\n"
            "  --trace_clock clock\n"
@@ -348,17 +347,15 @@ inline bool StrToNum(const std::string& sString, T &tX)
     return (iStream >> tX) ? true : false;
 }
 
-static void ParseLongOpt(const string& cmd,
-                         int optionIndex,
-                         bool& isTrue)
+static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
 {
     if (!strcmp(g_longOptions[optionIndex].name, "buffer_size")) {
         if (!StrToNum(optarg, g_bufferSizeKB)) {
             printf("Error: the bufferSize is illegal input. eg: \"--buffer_size 1024.\"\n");
-            isTrue &= false;
+            isTrue = false;
         } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
             printf("Error: the buffer size should be within 256 KB to 300 MB. eg: \"--buffer_size 1024.\"\n");
-            isTrue &= false;
+            isTrue = false;
         }
         g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
     } else if (!strcmp(g_longOptions[optionIndex].name, "trace_clock")) {
@@ -367,29 +364,29 @@ static void ParseLongOpt(const string& cmd,
             g_clock = optarg;
         } else {
             printf("Error: \"--trace_clock\" is illegal input. eg: \"--trace_clock boot.\"\n");
-            isTrue &= false;
+            isTrue = false;
         }
     } else if (!strcmp(g_longOptions[optionIndex].name, "help")) {
         ShowHelp(cmd);
-        isTrue &= false;
+        isTrue = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "time")) {
         if (!StrToNum(optarg, g_traceDuration)) {
             printf("Error: the time is illegal input. eg: \"--time 5.\"\n");
-            isTrue &= false;
+            isTrue = false;
         } else if (g_traceDuration < 1) {
             printf("Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
-            isTrue &= false;
+            isTrue = false;
         }
     } else if (!strcmp(g_longOptions[optionIndex].name, "list_categories")) {
         ShowListCategory();
-        isTrue &= false;
+        isTrue = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "output")) {
         struct stat buf;
         size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
         if (len == MAX_OUTPUT_LEN || len < 1 ||
             (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR) != 0)) {
             printf("Error: output file is illegal.\n");
-            isTrue &= false;
+            isTrue = false;
         } else {
             g_outputFile = optarg;
         }
@@ -417,29 +414,29 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
         case 'b': {
             if (!StrToNum(optarg, g_bufferSizeKB)) {
                 printf("Error: the bufferSize is illegal input. eg: \"--buffer_size 1024.\"\n");
-                isTrue &= false;
+                isTrue = false;
             } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
                 printf("Error: the buffer size should be within 256 KB to 300 MB. eg: \"--buffer_size 1024.\"\n");
-                isTrue &= false;
+                isTrue = false;
             }
             g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
             break;
         }
         case 'h':
             ShowHelp(argv[0]);
-            isTrue &= false;
+            isTrue = false;
             break;
         case 'l':
             ShowListCategory();
-            isTrue &= false;
+            isTrue = false;
             break;
         case 't': {
             if (!StrToNum(optarg, g_traceDuration)) {
                 printf("Error: the time is illegal input. eg: \"--time 5.\"\n");
-                isTrue &= false;
+                isTrue = false;
             } else if (g_traceDuration < 1) {
                 printf("Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
-                isTrue &= false;
+                isTrue = false;
             }
             break;
         }
@@ -449,7 +446,7 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
             if (len == MAX_OUTPUT_LEN || len < 1 ||
                 (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR) != 0)) {
                 printf("Error: output file is illegal.\n");
-                isTrue &= false;
+                isTrue = false;
             } else {
                 g_outputFile = optarg;
             }
@@ -463,7 +460,7 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
             break;
         default:
             ShowHelp(argv[0]);
-            isTrue &= false;
+            isTrue = false;
             break;
     }
     return isTrue;
@@ -492,7 +489,7 @@ static bool HandleOpt(int argc, char** argv)
             IsInvalidOpt(argc, argv);
             break;
         }
-        isTrue &= ParseOpt(opt, argv, optionIndex);
+        isTrue = ParseOpt(opt, argv, optionIndex);
     }
     return isTrue;
 }
@@ -645,7 +642,8 @@ static bool MarkOthersClockSync()
         return false;
     }
     if (write(fd, buffer, len) < 0) {
-        fprintf(stderr, "Error: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Warning: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "the buffer is not enough, please increase the buffer\n");
     }
     len = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "trace_event_clock_sync: parent_ts=%f\n",
         static_cast<float>(((static_cast<float>(mts.tv_sec)) * nanoSeconds + mts.tv_nsec) / nanoToSecond));
@@ -655,7 +653,8 @@ static bool MarkOthersClockSync()
         return false;
     }
     if (write(fd, buffer, len) < 0) {
-        fprintf(stderr, "Error: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Warning: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "the buffer is not enough, please increase the buffer\n");
     }
     close(fd);
     return true;
@@ -746,6 +745,16 @@ static void InitKernelSupportTags()
         { "events/power/cpu_idle/enable" },
     }};
 
+    g_tagMap["binder"] = { "binder", "Binder kernel Info", 0, KERNEL, {
+        { "events/binder/binder_transaction/enable" },
+        { "events/binder/binder_transaction_received/enable" },
+        { "events/binder/binder_transaction_alloc_buf/enable" },
+        { "events/binder/binder_set_priority/enable" },
+        { "events/binder/binder_lock/enable" },
+        { "events/binder/binder_locked/enable" },
+        { "events/binder/binder_unlock/enable" },
+    }};
+
     g_tagMap["load"] = { "load", "CPU Load", 0, KERNEL, {
         { "events/cpufreq_interactive/enable" },
     }};
@@ -789,6 +798,13 @@ static void InitAllSupportTags()
     g_tagMap["graphic"] = { "graphic", "Graphic Module", BYTRACE_TAG_GRAPHIC_AGP, USER, {}};
     g_tagMap["ace"] = { "ace", "ACE development framework", BYTRACE_TAG_ACE, USER, {}};
     g_tagMap["notification"] = { "notification", "Notification Module", BYTRACE_TAG_NOTIFICATION, USER, {}};
+    g_tagMap["misc"] = { "misc", "Misc Module", BYTRACE_TAG_MISC, USER, {}};
+    g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module", BYTRACE_TAG_MULTIMODALINPUT, USER, {}};
+    g_tagMap["sensors"] = { "sensors", "Sensors Module", BYTRACE_TAG_SENSORS, USER, {}};
+    g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", BYTRACE_TAG_MSDP, USER, {}};
+    g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", BYTRACE_TAG_DSOFTBUS, USER, {}};
+    g_tagMap["rpc"] = { "rpc", "RPC and IPC", BYTRACE_TAG_RPC, USER, {}};
+    g_tagMap["ark"] = { "ark", "ARK Module", BYTRACE_TAG_ARK, USER, {}};
     g_tagMap["app"] = { "app", "APP Module", BYTRACE_TAG_APP, USER, {}};
     g_tagMap["zbinder"] = { "zbinder", "Harmony binder communication", 0, KERNEL, {
         { "events/zbinder/enable" },
@@ -830,16 +846,15 @@ int main(int argc, char **argv)
     }
 
     bool isTrue = true;
-
     if (g_traceStart) {
         SetViewStyle();
-        isTrue &= StartTrace();
+        isTrue = isTrue && StartTrace();
     }
 
-    isTrue &= MarkOthersClockSync();
+    isTrue = isTrue && MarkOthersClockSync();
 
     if (g_traceStop) {
-        isTrue &= StopTrace();
+        isTrue = isTrue && StopTrace();
     }
 
     if (isTrue && g_traceDump) {
