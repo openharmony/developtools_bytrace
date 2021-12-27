@@ -6,7 +6,7 @@
         "//developtools/bytrace_standard/interfaces/innerkits/native:bytrace_core",
         "//developtools/bytrace_standard/bin:bytrace_target",
         "//developtools/bytrace_standard/bin:bytrace.cfg",
-        "//developtools/bytrace_standard/interfaces/kits/js/napi:bytrace"
+        "//developtools/bytrace_standard/interfaces/kits:jsapi_kits_target"
       ],
       "inner_kits": [
         {
