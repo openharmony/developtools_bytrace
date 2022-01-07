@@ -43,6 +43,7 @@ constexpr uint64_t BYTRACE_TAG_MSDP = (1ULL << 44); // Multimodal Sensor Data Pl
 constexpr uint64_t BYTRACE_TAG_DSOFTBUS = (1ULL << 45); // Distributed Softbus tag.
 constexpr uint64_t BYTRACE_TAG_RPC = (1ULL << 46); // RPC and IPC tag.
 constexpr uint64_t BYTRACE_TAG_ARK = (1ULL << 47); // ARK tag.
+constexpr uint64_t BYTRACE_TAG_WINDOW_MANAGER = (1ULL << 48); // window manager tag.
 constexpr uint64_t BYTRACE_TAG_APP = (1ULL << 62); // App tag.
 
 constexpr uint64_t BYTRACE_TAG_LAST = BYTRACE_TAG_APP;

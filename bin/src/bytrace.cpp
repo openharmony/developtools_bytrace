@@ -805,6 +805,7 @@ static void InitAllSupportTags()
     g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", BYTRACE_TAG_DSOFTBUS, USER, {}};
     g_tagMap["rpc"] = { "rpc", "RPC and IPC", BYTRACE_TAG_RPC, USER, {}};
     g_tagMap["ark"] = { "ark", "ARK Module", BYTRACE_TAG_ARK, USER, {}};
+    g_tagMap["window"] = { "window", "Window Manager", BYTRACE_TAG_WINDOW_MANAGER, USER, {}};
     g_tagMap["app"] = { "app", "APP Module", BYTRACE_TAG_APP, USER, {}};
     g_tagMap["zbinder"] = { "zbinder", "Harmony binder communication", 0, KERNEL, {
         { "events/zbinder/enable" },
