@@ -1,5 +1,5 @@
 {
-  "name": "@ohos/bytrace_stardard",
+  "name": "@ohos/bytrace_standard",
   "description": "A tool to trace processes and monitor performance",
   "version": "3.1",
   "license": "Apache License 2.0",
@@ -10,7 +10,7 @@
   "dirs": {},
   "scripts": {},
   "component": {
-    "name": "bytrace_stardard",
+    "name": "bytrace_standard",
     "subsystem": "developtools",
     "adapted_system_type": [
       "standard"
@@ -37,19 +37,20 @@
         "//developtools/bytrace_standard/interfaces/kits:jsapi_kits_target"
       ],
       "inner_kits": [
-       {
-        "type": "so",
-        "name": "//developtools/bytrace_standard/interfaces/innerkits/native:bytrace_core",
-        "header": {
-          "header_files": [
-            "bytrace.h"
-          ],
-          "header_base": "//developtools/bytrace_standard/interfaces/innerkits/native/include"
+        {
+          "type": "so",
+          "name": "//developtools/bytrace_standard/interfaces/innerkits/native:bytrace_core",
+          "header": {
+            "header_files": [
+              "bytrace.h"
+            ],
+            "header_base": "//developtools/bytrace_standard/interfaces/innerkits/native/include"
+          }
         }
-      }
-     ],
-     "test_list": [
-      "//developtools/bytrace_standard/bin/test:unittest"
+      ],
+      "test_list": [
+        "//developtools/bytrace_standard/bin/test:unittest"
       ]
     }
+  }
 }
