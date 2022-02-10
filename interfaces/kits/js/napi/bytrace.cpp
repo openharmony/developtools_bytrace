@@ -125,7 +125,7 @@ static napi_value BytraceInit(napi_env env, napi_value exports)
 EXTERN_C_END
 
 /*
- * Module definition
+ * Bytrace module definition
  */
 static napi_module bytrace_module = {
     .nm_version = 1,
@@ -138,9 +138,24 @@ static napi_module bytrace_module = {
 };
 
 /*
+ * HiTraceMeter module definition
+ */
+static napi_module hitracemeter_module = {
+    .nm_version = 1,
+    .nm_flags = 0,
+    .nm_filename = "hiTraceMeter",
+    .nm_register_func = BytraceInit,
+    .nm_modname = "hiTraceMeter",
+    .nm_priv = ((void *)0),
+    .reserved = {0}
+};
+
+
+/*
  * Module registration
  */
 extern "C" __attribute__((constructor)) void RegisterModule(void)
 {
     napi_module_register(&bytrace_module);
+    napi_module_register(&hitracemeter_module);
 }
