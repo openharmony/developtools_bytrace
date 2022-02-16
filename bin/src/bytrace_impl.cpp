@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 #include <atomic>
+#include <cinttypes>
 #include <climits>
 #include <fcntl.h>
 #include <fstream>
-#include <inttypes.h>
 #include <mutex>
-#include <thread>
 #include <unistd.h>
 #include <vector>
 #include "bytrace.h"
@@ -120,7 +119,7 @@ void OpenTraceMarkerFile()
 }
 }; // namespace
 
-inline void AddBytraceMarker(MarkerType type, uint64_t tag, std::string name, std::string value)
+void AddBytraceMarker(MarkerType type, uint64_t tag, const std::string& name, const std::string& value)
 {
     if (UNEXPECTANTLY(!g_isBytraceInit)) {
         std::call_once(g_onceFlag, OpenTraceMarkerFile);

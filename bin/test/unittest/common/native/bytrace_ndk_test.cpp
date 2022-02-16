@@ -283,7 +283,7 @@ MyTrace GetTraceResult(const string& checkContent, const vector<string>& list)
     regex pattern(checkContent);
     smatch match;
     Param param {""};
-    for (int i = list.size() - 1; i >= 0; i--) {
+    for (unsigned int i = list.size() - 1; i >= 0; i--) {
         if (regex_match(list[i],  match, pattern)) {
             param.m_task = match[TASK];
             param.m_tid =  match[TID];
@@ -341,8 +341,13 @@ bool CleanTrace()
 
 static stringstream ReadFile(const string& filename)
 {
-    ifstream fin(filename.c_str());
     stringstream ss;
+    char resolvedPath[PATH_MAX] = { 0 };
+    if (realpath(filename.c_str(), resolvedPath) == nullptr) {
+        fprintf(stderr, "Error: _fullpath %s failed", filename.c_str());
+        return ss;
+    }
+    ifstream fin(resolvedPath);
     if (!fin.is_open()) {
         fprintf(stderr, "opening file: %s failed!", filename.c_str());
         return ss;

@@ -15,6 +15,7 @@
 
 #include "bytrace.h"
 #include <cinttypes>
+#include <csignal>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -26,7 +27,6 @@
 #include <vector>
 #include <fcntl.h>
 #include <getopt.h>
-#include <signal.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -48,7 +48,7 @@ struct option g_longOptions[] = {
     { "list_categories",   no_argument,       nullptr, 0 },
     { "overwrite",         no_argument,       nullptr, 0 },
 };
-const int CHUNK_SIZE = 65536;
+const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 
 const string TRACE_TAG_PROPERTY = "debug.bytrace.tags.enableflags";
@@ -100,8 +100,8 @@ static bool IsTraceMounted()
         g_traceRootPath = tracefsPath;
         return true;
     }
-
-    fprintf(stderr, "Error: Did not find trace folder\n");
+    if (fprintf(stderr, "Error: Did not find trace folder\n") == -1) {
+    }
     return false;
 }
 
@@ -168,9 +168,28 @@ static bool IsTagSupported(const string& name)
     return findPath;
 }
 
+static string CanonicalizeSpecPath(const char* src)
+{
+    char resolvedPath[PATH_MAX] = { 0 };
+#if defined(_WIN32)
+    if (!_fullpath(resolvedPath, src, PATH_MAX)) {
+        fprintf(stderr, "Error: _fullpath %s failed", src);
+        return "";
+    }
+#else
+    if (realpath(src, resolvedPath) == nullptr) {
+        fprintf(stderr, "Error: _fullpath %s failed", src);
+        return "";
+    }
+#endif
+    string res(resolvedPath);
+    return res;
+}
+
 static string ReadFile(const string& filename)
 {
-    ifstream fin((g_traceRootPath + filename).c_str());
+    string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + filename).c_str());
+    ifstream fin(resolvedPath.c_str());
     if (!fin.is_open()) {
         fprintf(stderr, "open file: %s failed!", (g_traceRootPath + filename).c_str());
         return "";
@@ -546,7 +565,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
         fprintf(stderr, "Error: initializing zlib: %d\n", ret);
         return;
     }
-    int have;
+    unsigned int have = 0;
     std::unique_ptr<uint8_t[]>  in = std::make_unique<uint8_t[]>(CHUNK_SIZE);
     std::unique_ptr<uint8_t[]>  out = std::make_unique<uint8_t[]>(CHUNK_SIZE);
     int flush = Z_NO_FLUSH;
@@ -586,7 +605,8 @@ static void DumpCompressedTrace(int traceFd, int outFd)
 
 static void DumpTrace(int outFd, const string& path)
 {
-    int traceFd = open((g_traceRootPath + path).c_str(), O_RDWR);
+    string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + path).c_str());
+    int traceFd = open(resolvedPath.c_str(), O_RDWR);
     if (traceFd == -1) {
         fprintf(stderr, "error opening %s: %s (%d)\n", path.c_str(),
                 strerror(errno), errno);
@@ -613,7 +633,8 @@ static bool MarkOthersClockSync()
 {
     constexpr unsigned int bufferSize = 128; // buffer size
     char buffer[bufferSize] = { 0 };
-    int fd = open((g_traceRootPath + TRACE_MARKER_PATH).c_str(), O_WRONLY);
+    string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + TRACE_MARKER_PATH).c_str());
+    int fd = open(resolvedPath.c_str(), O_WRONLY);
     if (fd == -1) {
         fprintf(stderr, "Error: opening %s: %s (%d)\n", TRACE_MARKER_PATH.c_str(), strerror(errno), errno);
         return false;
@@ -799,7 +820,8 @@ static void InitAllSupportTags()
     g_tagMap["ace"] = { "ace", "ACE development framework", BYTRACE_TAG_ACE, USER, {}};
     g_tagMap["notification"] = { "notification", "Notification Module", BYTRACE_TAG_NOTIFICATION, USER, {}};
     g_tagMap["misc"] = { "misc", "Misc Module", BYTRACE_TAG_MISC, USER, {}};
-    g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module", BYTRACE_TAG_MULTIMODALINPUT, USER, {}};
+    g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module",
+        BYTRACE_TAG_MULTIMODALINPUT, USER, {}};
     g_tagMap["sensors"] = { "sensors", "Sensors Module", BYTRACE_TAG_SENSORS, USER, {}};
     g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", BYTRACE_TAG_MSDP, USER, {}};
     g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", BYTRACE_TAG_DSOFTBUS, USER, {}};
@@ -862,7 +884,8 @@ int main(int argc, char **argv)
         int outFd = STDOUT_FILENO;
         if (g_outputFile.size() > 0) {
             printf("write trace to %s\n", g_outputFile.c_str());
-            outFd = open(g_outputFile.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+            string resolvedPath = CanonicalizeSpecPath(g_outputFile.c_str());
+            outFd = open(resolvedPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         }
         if (outFd == -1) {
             printf("Failed to open '%s', err=%d", g_outputFile.c_str(), errno);

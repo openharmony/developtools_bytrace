@@ -22,7 +22,6 @@
 extern "C" {
 #endif
 
-
 constexpr uint64_t BYTRACE_TAG_NEVER = 0; // This tag is never enabled.
 constexpr uint64_t BYTRACE_TAG_ALWAYS = (1ULL << 0); // This tag is always enabled.
 constexpr uint64_t BYTRACE_TAG_OHOS = (1ULL << 30); // OHOS generic tag.
