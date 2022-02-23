@@ -283,7 +283,7 @@ MyTrace GetTraceResult(const string& checkContent, const vector<string>& list)
     regex pattern(checkContent);
     smatch match;
     Param param {""};
-    for (unsigned int i = list.size() - 1; i >= 0; i--) {
+    for (int i = list.size() - 1; i >= 0; i--) {
         if (regex_match(list[i],  match, pattern)) {
             param.m_task = match[TASK];
             param.m_tid =  match[TID];
