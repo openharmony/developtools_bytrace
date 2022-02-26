@@ -100,8 +100,8 @@ static bool IsTraceMounted()
         g_traceRootPath = tracefsPath;
         return true;
     }
-    if (fprintf(stderr, "Error: Did not find trace folder\n") == -1) {
-    }
+
+    fprintf(stderr, "Error: Did not find trace folder\n");
     return false;
 }
 
@@ -120,12 +120,12 @@ static bool WriteStrToFile(const string& filename, const std::string& str)
     ofstream out;
     out.open(g_traceRootPath + filename, ios::out);
     if (out.fail()) {
-        fprintf(stderr, "Error: Did not open %s.\n", filename.c_str());
+        fprintf(stderr, "Error: Did not open %s\n", filename.c_str());
         return false;
     }
     out << str;
     if (out.bad()) {
-        fprintf(stderr, "Error: Did not write %s.\n", filename.c_str());
+        fprintf(stderr, "Error: Did not write %s\n", filename.c_str());
         out.close();
         return false;
     }
@@ -173,13 +173,13 @@ static string CanonicalizeSpecPath(const char* src)
     char resolvedPath[PATH_MAX] = { 0 };
 #if defined(_WIN32)
     if (!_fullpath(resolvedPath, src, PATH_MAX)) {
-        fprintf(stderr, "Error: _fullpath %s failed", src);
+        fprintf(stderr, "Error: _fullpath %s failed\n", src);
         return "";
     }
 #else
     if (access(src, F_OK) == 0) {
         if (realpath(src, resolvedPath) == nullptr) {
-            fprintf(stderr, "Error: _fullpath %s failed", src);
+            fprintf(stderr, "Error: _fullpath %s failed\n", src);
             return "";
         }
     } else {
@@ -197,7 +197,7 @@ static string ReadFile(const string& filename)
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + filename).c_str());
     ifstream fin(resolvedPath.c_str());
     if (!fin.is_open()) {
-        fprintf(stderr, "open file: %s failed!", (g_traceRootPath + filename).c_str());
+        fprintf(stderr, "open file: %s failed!\n", (g_traceRootPath + filename).c_str());
         return "";
     }
 
@@ -209,7 +209,7 @@ static string ReadFile(const string& filename)
 static bool SetBufferSize(int bufferSize)
 {
     if (!WriteStrToFile(CURRENT_TRACER_PATH, "nop")) {
-        fprintf(stderr, "Error: write \"nop\" to %s.\n", CURRENT_TRACER_PATH.c_str());
+        fprintf(stderr, "Error: write \"nop\" to %s\n", CURRENT_TRACER_PATH.c_str());
     }
     return WriteStrToFile(BUFFER_SIZE_PATH, to_string(bufferSize));
 }
@@ -237,7 +237,7 @@ static bool SetClock(const string& timeclock)
         // global: is in sync with all CPUs but may be a bit slower than the local clock.
         newClock = "global";
     } else {
-        printf("You can set trace clock in %s\n", allClocks.c_str());
+        fprintf(stderr, "You can set trace clock in %s\n", allClocks.c_str());
         return false;
     }
     if (newClock.size() != 0) {
@@ -376,10 +376,10 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
 {
     if (!strcmp(g_longOptions[optionIndex].name, "buffer_size")) {
         if (!StrToNum(optarg, g_bufferSizeKB)) {
-            printf("Error: the bufferSize is illegal input. eg: \"--buffer_size 1024.\"\n");
+            fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
             isTrue = false;
         } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
-            printf("Error: the buffer size should be within 256 KB to 300 MB. eg: \"--buffer_size 1024.\"\n");
+            fprintf(stderr, "Error: buffer size must be from 256 KB to 300 MB. eg: \"--buffer_size 1024\"\n");
             isTrue = false;
         }
         g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
@@ -388,7 +388,7 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
         if (regex_match(optarg, re)) {
             g_clock = optarg;
         } else {
-            printf("Error: \"--trace_clock\" is illegal input. eg: \"--trace_clock boot.\"\n");
+            fprintf(stderr, "Error: \"--trace_clock\" is illegal input. eg: \"--trace_clock boot\"\n");
             isTrue = false;
         }
     } else if (!strcmp(g_longOptions[optionIndex].name, "help")) {
@@ -396,10 +396,10 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
         isTrue = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "time")) {
         if (!StrToNum(optarg, g_traceDuration)) {
-            printf("Error: the time is illegal input. eg: \"--time 5.\"\n");
+            fprintf(stderr, "Error: the time is illegal input. eg: \"--time 5\"\n");
             isTrue = false;
         } else if (g_traceDuration < 1) {
-            printf("Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
+            fprintf(stderr, "Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
             isTrue = false;
         }
     } else if (!strcmp(g_longOptions[optionIndex].name, "list_categories")) {
@@ -410,7 +410,7 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
         size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
         if (len == MAX_OUTPUT_LEN || len < 1 ||
             (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR) != 0)) {
-            printf("Error: output file is illegal.\n");
+            fprintf(stderr, "Error: output file is illegal\n");
             isTrue = false;
         } else {
             g_outputFile = optarg;
@@ -438,10 +438,10 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
     switch (opt) {
         case 'b': {
             if (!StrToNum(optarg, g_bufferSizeKB)) {
-                printf("Error: the bufferSize is illegal input. eg: \"--buffer_size 1024.\"\n");
+                fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
                 isTrue = false;
             } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
-                printf("Error: the buffer size should be within 256 KB to 300 MB. eg: \"--buffer_size 1024.\"\n");
+                fprintf(stderr, "Error: buffer size must be from 256 KB to 300 MB. eg: \"--buffer_size 1024\"\n");
                 isTrue = false;
             }
             g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
@@ -457,10 +457,10 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
             break;
         case 't': {
             if (!StrToNum(optarg, g_traceDuration)) {
-                printf("Error: the time is illegal input. eg: \"--time 5.\"\n");
+                fprintf(stderr, "Error: the time is illegal input. eg: \"--time 5\"\n");
                 isTrue = false;
             } else if (g_traceDuration < 1) {
-                printf("Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
+                fprintf(stderr, "Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
                 isTrue = false;
             }
             break;
@@ -470,7 +470,7 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
             size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
             if (len == MAX_OUTPUT_LEN || len < 1 ||
                 (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR) != 0)) {
-                printf("Error: output file is illegal.\n");
+                fprintf(stderr, "Error: output file is illegal\n");
                 isTrue = false;
             } else {
                 g_outputFile = optarg;
@@ -495,8 +495,8 @@ static void IsInvalidOpt(int argc, char** argv)
 {
     for (int i = optind; i < argc; i++) {
         if (!IsTagSupported(argv[i])) {
-            fprintf(stderr, "Error: \"%s\" is not support category on this device.\n", argv[i]);
-            exit(0);
+            fprintf(stderr, "Error: \"%s\" is not support category on this device\n", argv[i]);
+            exit(-1);
         }
     }
 }
@@ -523,8 +523,7 @@ static bool TruncateFile(const string& path)
 {
     int fd = creat((g_traceRootPath + path).c_str(), 0);
     if (fd == -1) {
-        fprintf(stderr, "Error: clear %s: %s (%d)\n", (g_traceRootPath + path).c_str(),
-            strerror(errno), errno);
+        fprintf(stderr, "Error: clear %s: %s (%d)\n", (g_traceRootPath + path).c_str(), strerror(errno), errno);
         return false;
     }
     close(fd);
@@ -563,7 +562,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
     ssize_t bytesWritten;
     ssize_t bytesRead;
     if (memset_s(&zs, sizeof(zs), 0, sizeof(zs)) != 0) {
-        fprintf(stderr, "Error: zip stream buffer init failed.");
+        fprintf(stderr, "Error: zip stream buffer init failed\n");
         return;
     }
     int ret = deflateInit(&zs, Z_DEFAULT_COMPRESSION);
@@ -576,7 +575,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
     std::unique_ptr<uint8_t[]>  out = std::make_unique<uint8_t[]>(CHUNK_SIZE);
     int flush = Z_NO_FLUSH;
     if (!in || !out) {
-        fprintf(stderr, "Error: couldn't allocate buffers.\n");
+        fprintf(stderr, "Error: couldn't allocate buffers\n");
         return;
     }
     do {
@@ -614,8 +613,7 @@ static void DumpTrace(int outFd, const string& path)
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + path).c_str());
     int traceFd = open(resolvedPath.c_str(), O_RDWR);
     if (traceFd == -1) {
-        fprintf(stderr, "error opening %s: %s (%d)\n", path.c_str(),
-                strerror(errno), errno);
+        fprintf(stderr, "error opening %s: %s (%d)\n", path.c_str(), strerror(errno), errno);
         return;
     }
     ssize_t bytesWritten;
@@ -894,7 +892,8 @@ int main(int argc, char **argv)
             outFd = open(resolvedPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         }
         if (outFd == -1) {
-            printf("Failed to open '%s', err=%d", g_outputFile.c_str(), errno);
+            fprintf(stderr, "Failed to open file '%s', err=%d", g_outputFile.c_str(), errno);
+            isTrue = false;
         } else {
             dprintf(outFd, "TRACE:\n");
             DumpTrace(outFd, TRACE_PATH);
@@ -909,5 +908,5 @@ int main(int argc, char **argv)
     ClearUserSpaceSettings();
     ClearKernelSpaceSettings();
 
-    return isTrue;
+    return isTrue ? 0 : -1;
 }
