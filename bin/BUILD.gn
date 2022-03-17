@@ -30,6 +30,9 @@ ohos_static_library("bytrace_inner") {
 
     #"distributedschedule:samgr_standard"
   ]
+
+  subsystem_name = "developtools"
+  part_name = "bytrace_standard"
 }
 
 config("bytrace_capture_inner_config") {
@@ -47,6 +50,9 @@ ohos_static_library("bytrace_capture_inner") {
     "ipc:ipc_core",
     "startup_l2:syspara",
   ]
+
+  subsystem_name = "developtools"
+  part_name = "bytrace_standard"
 }
 
 ohos_executable("bytrace") {
