@@ -19,7 +19,5 @@ group("jsapi_kits_target") {
       "js/napi:bytrace",
       "js/napi:hitracemeter_napi",
     ]
-    subsystem_name = "developtools"
-    part_name = "bytrace_standard"
   }
 }

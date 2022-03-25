@@ -15,6 +15,4 @@ import("//build/ohos.gni")
 
 group("innerkits_target") {
   deps = [ "native:bytrace_core" ]
-  subsystem_name = "developtools"
-  part_name = "bytrace_standard"
 }

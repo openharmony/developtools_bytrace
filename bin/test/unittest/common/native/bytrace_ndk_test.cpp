@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ public:
     static void SetUpTestCase(void);
     static void TearDownTestCase(void);
     void SetUp();
-    void TearDown() {};
+    void TearDown() {}
 };
 
 void  BytraceNDKTest::SetUpTestCase()
@@ -121,7 +121,7 @@ struct Param {
 
 class MyTrace {
     Param m_param;
-    bool m_loaded;
+    bool m_loaded = false;
 public:
     MyTrace() : m_loaded(false)
     {
