@@ -540,7 +540,7 @@ static bool TruncateFile(const string& path)
 {
     int fd = creat((g_traceRootPath + path).c_str(), 0);
     if (fd == -1) {
-        fprintf(stderr, "Error: clear %s: %s (%d)\n", (g_traceRootPath + path).c_str(), strerror(errno), errno);
+        fprintf(stderr, "Error: clear %s, errno: %d\n", (g_traceRootPath + path).c_str(), errno);
         return false;
     }
     close(fd);
@@ -600,7 +600,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
         if (bytesRead == 0) {
             flush = Z_FINISH;
         } else if (bytesRead == -1) {
-            fprintf(stderr, "Error: reading trace: %s (%d)\n", strerror(errno), errno);
+            fprintf(stderr, "Error: reading trace, errno: %d\n", errno);
             break;
         }
         zs.next_in = reinterpret_cast<Bytef*>(in.get());
@@ -617,7 +617,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
             bytesWritten = TEMP_FAILURE_RETRY(write(outFd, out.get(), have));
             if (bytesWritten < 0 || (static_cast<size_t>(bytesWritten) < static_cast<size_t>(have)) ||
                 bytesWritten == -1) {
-                fprintf(stderr, "Error: writing deflated trace: %s (%d)\n", strerror(errno), errno);
+                fprintf(stderr, "Error: writing deflated trace, errno: %d\n", errno);
                 break;
             }
         } while (zs.avail_out == 0);
@@ -630,7 +630,7 @@ static void DumpTrace(int outFd, const string& path)
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + path).c_str());
     int traceFd = open(resolvedPath.c_str(), O_RDWR);
     if (traceFd == -1) {
-        fprintf(stderr, "error opening %s: %s (%d)\n", path.c_str(), strerror(errno), errno);
+        fprintf(stderr, "error opening %s, errno: %d\n", path.c_str(), errno);
         return;
     }
     ssize_t bytesWritten;
@@ -657,18 +657,18 @@ static bool MarkOthersClockSync()
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + TRACE_MARKER_PATH).c_str());
     int fd = open(resolvedPath.c_str(), O_WRONLY);
     if (fd == -1) {
-        fprintf(stderr, "Error: opening %s: %s (%d)\n", TRACE_MARKER_PATH.c_str(), strerror(errno), errno);
+        fprintf(stderr, "Error: opening %s, errno: %d\n", TRACE_MARKER_PATH.c_str(), errno);
         return false;
     }
 
     struct timespec mts = {0, 0};
     struct timespec rts = {0, 0};
     if (clock_gettime(CLOCK_REALTIME, &rts) == -1) {
-        fprintf(stderr, "Error: get realtime %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Error: get realtime, errno: %d\n", errno);
         close(fd);
         return false;
     } else if (clock_gettime(CLOCK_MONOTONIC, &mts) == -1) {
-        fprintf(stderr, "Error: get parent_ts %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Error: get parent_ts, errno: %d\n", errno);
         close(fd);
         return false;
     }
@@ -679,23 +679,23 @@ static bool MarkOthersClockSync()
         "trace_event_clock_sync: realtime_ts=%" PRId64 "\n",
         static_cast<int64_t>((rts.tv_sec * nanoSeconds + rts.tv_nsec) / nanoToMill));
     if (len < 0) {
-        fprintf(stderr, "Error: entering data into buffer %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Error: entering data into buffer, errno: %d\n", errno);
         close(fd);
         return false;
     }
     if (write(fd, buffer, len) < 0) {
-        fprintf(stderr, "Warning: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Warning: writing clock sync marker, errno: %d\n", errno);
         fprintf(stderr, "the buffer is not enough, please increase the buffer\n");
     }
     len = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "trace_event_clock_sync: parent_ts=%f\n",
         static_cast<float>(((static_cast<float>(mts.tv_sec)) * nanoSeconds + mts.tv_nsec) / nanoToSecond));
     if (len < 0) {
-        fprintf(stderr, "Error: entering data into buffer %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Error: entering data into buffer, errno: %d\n", errno);
         close(fd);
         return false;
     }
     if (write(fd, buffer, len) < 0) {
-        fprintf(stderr, "Warning: writing clock sync marker %s (%d)\n", strerror(errno), errno);
+        fprintf(stderr, "Warning: writing clock sync marker, errno: %d\n", errno);
         fprintf(stderr, "the buffer is not enough, please increase the buffer\n");
     }
     close(fd);
