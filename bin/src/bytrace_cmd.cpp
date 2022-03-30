@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#include "bytrace.h"
 #include <cinttypes>
 #include <csignal>
 #include <cstdio>
@@ -31,10 +30,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <zlib.h>
-#include "bytrace_capture.h"
+#include "bytrace.h"
+#include "bytrace_osal.h"
 #include "securec.h"
 
 using namespace std;
+using namespace OHOS::Developtools::BytraceOsal;
+
 namespace {
 struct option g_longOptions[] = {
     { "buffer_size",       required_argument, nullptr, 0 },
@@ -101,7 +103,7 @@ static bool IsTraceMounted()
         return true;
     }
 
-    fprintf(stderr, "Error: Did not find trace folder\n");
+    (void)fprintf(stderr, "Error: Did not find trace folder\n");
     return false;
 }
 
@@ -298,8 +300,14 @@ static bool SetTraceTagsEnabled(uint64_t tags)
 
 static bool RefreshServices()
 {
-    RefreshBinderServices();
-    return RefreshHalServices();
+    bool res = false;
+
+    res = RefreshBinderServices();
+    if (!res) {
+        return res;
+    }
+    res = RefreshHalServices();
+    return res;
 }
 
 static bool SetUserSpaceSettings()
@@ -419,8 +427,7 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
     } else if (!strcmp(g_longOptions[optionIndex].name, "output")) {
         struct stat buf;
         size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
-        if (len == MAX_OUTPUT_LEN || len < 1 ||
-            (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
+        if (len == MAX_OUTPUT_LEN || len < 1 || (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
             fprintf(stderr, "Error: output file is illegal\n");
             isTrue = false;
         } else {
@@ -479,8 +486,7 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
         case 'o': {
             struct stat buf;
             size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
-            if (len == MAX_OUTPUT_LEN || len < 1 ||
-                (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
+            if (len == MAX_OUTPUT_LEN || len < 1 || (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
                 fprintf(stderr, "Error: output file is illegal\n");
                 isTrue = false;
             } else {
@@ -569,7 +575,7 @@ static bool StopTrace()
 
 static void DumpCompressedTrace(int traceFd, int outFd)
 {
-    z_stream zs { 0 };
+    z_stream zs { nullptr };
     ssize_t bytesWritten;
     ssize_t bytesRead;
     if (memset_s(&zs, sizeof(zs), 0, sizeof(zs)) != 0) {
@@ -713,9 +719,12 @@ static void InitDiskSupportTags()
     g_tagMap["mmc"] = { "mmc", "eMMC commands", 0, KERNEL, {
         { "events/mmc/enable" },
     }};
+    g_tagMap["ufs"] = { "ufs", "UFS commands", 0, KERNEL, {
+        { "events/ufs/enable" },
+    }};
 }
 
-static void  InitHardwareSupportTags()
+static void InitHardwareSupportTags()
 {
     g_tagMap["irq"] = { "irq", "IRQ Events", 0, KERNEL, {
         { "events/irq/enable" },
@@ -737,6 +746,16 @@ static void  InitHardwareSupportTags()
         { "events/i2c/smbus_result/enable" },
         { "events/i2c/smbus_reply/enable" },
     }};
+    g_tagMap["regulators"] = { "regulators", "Voltage and Current Regulators", 0, KERNEL, {
+        { "events/regulator/enable" },
+    }};
+    g_tagMap["membus"] = { "membus", "Memory Bus Utilization", 0, KERNEL, {
+        { "events/memory_bus/enable" },
+    }};
+}
+
+static void InitCpuSupportTags()
+{
     g_tagMap["freq"] = { "freq", "CPU Frequency", 0, KERNEL, {
         { "events/power/cpu_frequency/enable" },
         { "events/power/clock_set_rate/enable" },
@@ -747,14 +766,11 @@ static void  InitHardwareSupportTags()
         { "events/clk/clk_enable/enable" },
         { "events/power/cpu_frequency_limits/enable" },
     }};
-    g_tagMap["ufs"] = { "ufs", "UFS commands", 0, KERNEL, {
-        { "events/ufs/enable" },
+    g_tagMap["idle"] = { "idle", "CPU Idle", 0, KERNEL, {
+        { "events/power/cpu_idle/enable" },
     }};
-    g_tagMap["regulators"] = { "regulators", "Voltage and Current Regulators", 0, KERNEL, {
-        { "events/regulator/enable" },
-    }};
-    g_tagMap["membus"] = { "membus", "Memory Bus Utilization", 0, KERNEL, {
-        { "events/memory_bus/enable" },
+    g_tagMap["load"] = { "load", "CPU Load", 0, KERNEL, {
+        { "events/cpufreq_interactive/enable" },
     }};
 }
 
@@ -777,9 +793,6 @@ static void InitKernelSupportTags()
         { "events/preemptirq/preempt_enable/enable" },
         { "events/preemptirq/preempt_disable/enable" },
     }};
-    g_tagMap["idle"] = { "idle", "CPU Idle", 0, KERNEL, {
-        { "events/power/cpu_idle/enable" },
-    }};
 
     g_tagMap["binder"] = { "binder", "Binder kernel Info", 0, KERNEL, {
         { "events/binder/binder_transaction/enable" },
@@ -791,9 +804,6 @@ static void InitKernelSupportTags()
         { "events/binder/binder_unlock/enable" },
     }};
 
-    g_tagMap["load"] = { "load", "CPU Load", 0, KERNEL, {
-        { "events/cpufreq_interactive/enable" },
-    }};
     g_tagMap["sync"] = { "sync", "Synchronization", 0, KERNEL, {
         // linux kernel > 4.9
         { "events/dma_fence/enable" },
@@ -816,6 +826,7 @@ static void InitKernelSupportTags()
         { "events/kmem/ion_heap_grow/enable" },
         { "events/kmem/ion_heap_shrink/enable" },
     }};
+    InitCpuSupportTags();
     InitHardwareSupportTags();
 }
 
@@ -859,8 +870,8 @@ static void InterruptExit(int signo)
 
 int main(int argc, char **argv)
 {
-    signal(SIGKILL, InterruptExit);
-    signal(SIGINT, InterruptExit);
+    (void)signal(SIGKILL, InterruptExit);
+    (void)signal(SIGINT, InterruptExit);
 
     if (!IsTraceMounted()) {
         exit(-1);

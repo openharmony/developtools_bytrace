@@ -20,12 +20,14 @@
 #include <gtest/gtest.h>
 #include <hilog/log.h>
 #include "bytrace.h"
-#include "bytrace_capture.h"
+#include "bytrace_osal.h"
 #include "parameters.h"
 
 using namespace testing::ext;
 using namespace std;
 using namespace OHOS::HiviewDFX;
+using namespace OHOS::Developtools::BytraceOsal;
+
 namespace OHOS {
 namespace Developtools {
 namespace BytraceTest {

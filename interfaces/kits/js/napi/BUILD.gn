@@ -17,7 +17,7 @@ import("//developtools/bytrace_standard/bytrace.gni")
 ohos_shared_library("bytrace") {
   sources = [
     "bytrace.cpp",
-    "declare_napi.cpp",
+    "bytrace_napi_common.cpp",
   ]
   deps = [
     "${innerkits_path}/native:bytrace_core",
@@ -33,7 +33,7 @@ ohos_shared_library("bytrace") {
 
 ohos_shared_library("hitracemeter_napi") {
   sources = [
-    "declare_napi.cpp",
+    "bytrace_napi_common.cpp",
     "hitracemeter.cpp",
   ]
   deps = [

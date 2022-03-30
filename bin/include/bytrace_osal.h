@@ -19,6 +19,9 @@
 #include <string>
 #include <map>
 
+namespace OHOS {
+namespace Developtools {
+namespace BytraceOsal {
 const int MAX_SYS_FILES = 11;
 enum TraceType { USER, KERNEL };
 struct TagCategory {
@@ -33,6 +36,9 @@ struct TagCategory {
 
 std::string GetPropertyInner(const std::string& property, const std::string& value);
 bool SetPropertyInner(const std::string& property, const std::string& value);
-void RefreshBinderServices();
-bool RefreshHalServices();
+bool RefreshBinderServices(void);
+bool RefreshHalServices(void);
+}
+}
+}
 #endif // BIN_INCLUDE_BYTRACE_CAPTURE_H

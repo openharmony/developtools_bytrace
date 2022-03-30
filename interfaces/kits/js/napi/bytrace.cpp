@@ -17,8 +17,9 @@
 #include <cstdlib>
 #include <string>
 #include <hilog/log.h>
-#include "bytrace.h"
-#include "declare_napi.h"
+#include "bytrace_napi_common.h"
+
+using namespace OHOS::Developtools::BytraceNapi;
 
 /*
  * bytrace module definition

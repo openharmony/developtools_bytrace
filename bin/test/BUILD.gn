@@ -24,7 +24,7 @@ ohos_unittest("BytraceNDKTest") {
   module_out_path = module_output_path
   sources = [ "unittest/common/native/bytrace_ndk_test.cpp" ]
   deps = [
-    "${bytrace_path}/bin:bytrace_capture_inner",
+    "${bytrace_path}/bin:bytrace_osal_inner",
     "${innerkits_path}/native:bytrace_core",
     "//third_party/googletest:gtest_main",
   ]

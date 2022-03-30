@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#include "bytrace_capture.h"
+#include "bytrace_osal.h"
 #include "bytrace.h"
 #include "parameters.h"
 
-using namespace std;
-bool SetPropertyInner(const string& property, const string& value)
+namespace OHOS {
+namespace Developtools {
+namespace BytraceOsal {
+bool SetPropertyInner(const std::string& property, const std::string& value)
 {
     bool result = OHOS::system::SetParameter(property, value);
     if (!result) {
@@ -32,11 +34,15 @@ std::string GetPropertyInner(const std::string& property, const std::string& val
     return OHOS::system::GetParameter(property, value);
 }
 
-void RefreshBinderServices()
-{
-}
-
-bool RefreshHalServices()
+bool RefreshBinderServices(void)
 {
     return true;
+}
+
+bool RefreshHalServices(void)
+{
+    return true;
+}
+}
+}
 }

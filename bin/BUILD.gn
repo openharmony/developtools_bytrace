@@ -14,14 +14,14 @@
 import("//build/ohos.gni")
 import("//developtools/bytrace_standard/bytrace.gni")
 
-config("bytrace_inner_config") {
+config("bytrace_lib_inner_config") {
   visibility = [ ":*" ]
   include_dirs = [ "${innerkits_path}/native/include" ]
 }
 
 ohos_static_library("bytrace_inner") {
   sources = [ "./src/bytrace_impl.cpp" ]
-  public_configs = [ ":bytrace_inner_config" ]
+  public_configs = [ ":bytrace_lib_inner_config" ]
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
@@ -35,7 +35,7 @@ ohos_static_library("bytrace_inner") {
   part_name = "bytrace_standard"
 }
 
-config("bytrace_capture_inner_config") {
+config("bytrace_osal_inner_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "./include",
@@ -43,9 +43,9 @@ config("bytrace_capture_inner_config") {
   ]
 }
 
-ohos_static_library("bytrace_capture_inner") {
-  sources = [ "./src/bytrace_capture.cpp" ]
-  public_configs = [ ":bytrace_capture_inner_config" ]
+ohos_static_library("bytrace_osal_inner") {
+  sources = [ "./src/bytrace_osal.cpp" ]
+  public_configs = [ ":bytrace_osal_inner_config" ]
   external_deps = [
     "ipc:ipc_core",
     "startup_l2:syspara",
@@ -57,10 +57,10 @@ ohos_static_library("bytrace_capture_inner") {
 
 ohos_executable("bytrace") {
   install_enable = true
-  sources = [ "./src/bytrace.cpp" ]
+  sources = [ "./src/bytrace_cmd.cpp" ]
 
   deps = [
-    ":bytrace_capture_inner",
+    ":bytrace_osal_inner",
     "${innerkits_path}/native:bytrace_core",
     "//third_party/zlib:libz",
     "//utils/native/base:utils",

@@ -13,15 +13,14 @@
  * limitations under the License.
  */
 
-#include "declare_napi.h"
-
 #include <cstdio>
 #include <cstdlib>
 #include <string>
 #include <hilog/log.h>
-#include "bytrace.h"
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "bytrace.h"
+#include "bytrace_napi_common.h"
 
 using namespace OHOS::HiviewDFX;
 namespace {
@@ -44,7 +43,7 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     char buf[NAME_MAX_SIZE] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, argv[0], buf, NAME_MAX_SIZE, &len);
-    std::string name = std::string{buf};
+    std::string name = std::string {buf};
 
     NAPI_CALL(env, napi_typeof(env, argv[1], &valueType));
     NAPI_ASSERT(env, valueType == napi_number, "Second arg type error, should is number");
@@ -76,7 +75,7 @@ static napi_value JSTraceFinish(napi_env env, napi_callback_info info)
     char buf[NAME_MAX_SIZE] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, argv[0], buf, NAME_MAX_SIZE, &len);
-    std::string name = std::string{buf};
+    std::string name = std::string {buf};
 
     NAPI_CALL(env, napi_typeof(env, argv[1], &valueType));
     NAPI_ASSERT(env, valueType == napi_number, "Second arg type error, should is number");
@@ -100,7 +99,7 @@ static napi_value JSTraceCount(napi_env env, napi_callback_info info)
     char buf[NAME_MAX_SIZE] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, argv[0], buf, NAME_MAX_SIZE, &len);
-    std::string name = std::string{buf};
+    std::string name = std::string {buf};
 
     NAPI_CALL(env, napi_typeof(env, argv[1], &valueType));
     NAPI_ASSERT(env, valueType == napi_number, "Second arg type error, should is number");
@@ -110,7 +109,9 @@ static napi_value JSTraceCount(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-EXTERN_C_START
+namespace OHOS {
+namespace Developtools {
+namespace BytraceNapi {
 /*
  * function for module exports
  */
@@ -124,4 +125,6 @@ napi_value BytraceInit(napi_env env, napi_value exports)
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
-EXTERN_C_END
+}
+}
+}

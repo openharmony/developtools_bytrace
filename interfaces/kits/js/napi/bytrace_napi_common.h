@@ -19,8 +19,12 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-EXTERN_C_START
+namespace OHOS {
+namespace Developtools {
+namespace BytraceNapi {
 napi_value BytraceInit(napi_env env, napi_value exports);
-EXTERN_C_END
+}
+}
+}
 
 #endif // INTERFACES_KITS_JS_NAPI_DECLARE_NAPI_H
