@@ -105,7 +105,7 @@ void OpenTraceMarkerFile()
     if (g_markerFd == -1) {
         g_markerFd = open(traceFile.c_str(), O_WRONLY | O_CLOEXEC);
         if (g_markerFd == -1) {
-            HiLog::Error(LABEL, "open trace file %{public}s failed: %{public}s", traceFile.c_str(), strerror(errno));
+            HiLog::Error(LABEL, "open trace file %{public}s failed: %{public}d", traceFile.c_str(), errno);
             g_tagsProperty = 0;
             return;
         }
@@ -132,7 +132,7 @@ void AddBytraceMarker(MarkerType type, uint64_t tag, const std::string& name, co
         record += (name.size() < NAME_MAX_SIZE) ? name : name.substr(0, NAME_MAX_SIZE);
         record += " " + value;
         if (write(g_markerFd, record.c_str(), record.size()) < 0) {
-            HiLog::Error(LABEL, "write trace_marker failed, %{public}s", strerror(errno));
+            HiLog::Error(LABEL, "write trace_marker failed, %{public}d", errno);
         }
     }
 }
