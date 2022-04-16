@@ -52,7 +52,7 @@ constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, BYTRACE_TAG, "BytraceCo
 
 static void ParameterChange(const char* key, const char* value, void* context)
 {
-    HiLog::Info(LABEL, "ParameterChange %{public}s", key);
+    HiLog::Info(LABEL, "Trace param %{public}s change notified", key);
     UpdateTraceLabel();
 }
 
@@ -88,7 +88,6 @@ uint64_t GetSysParamTags()
     // Get the system parameters of KEY_TRACE_TAG.
     uint64_t tags = OHOS::system::GetUintParameter<uint64_t>(KEY_TRACE_TAG, 0);
     if (tags == 0) {
-        // HiLog::Error(LABEL, "GetUintParameter %s error.\n", KEY_TRACE_TAG.c_str());
         return 0;
     }
 
@@ -111,6 +110,9 @@ void OpenTraceMarkerFile()
         }
     }
     g_tagsProperty = GetSysParamTags();
+    if (g_tagsProperty == 0 || (g_tagsProperty & BYTRACE_TAG_VALID_MASK) == BYTRACE_TAG_ALWAYS) {
+        HiLog::Info(LABEL, "Get trace param value zero firstly");
+    }
 
     if (WatchParameter(KEY_TRACE_TAG.c_str(), ParameterChange, nullptr) != 0) {
         HiLog::Error(LABEL, "WatchParameter %{public}s failed", KEY_TRACE_TAG.c_str());
@@ -140,9 +142,16 @@ void AddBytraceMarker(MarkerType type, uint64_t tag, const std::string& name, co
 void UpdateTraceLabel()
 {
     if (!g_isBytraceInit) {
+        HiLog::Info(LABEL, "trace param notified value delay to acquire");
         return;
     }
     g_tagsProperty = GetSysParamTags();
+    uint64_t val = g_tagsProperty;
+    if (val == 0 || (val & BYTRACE_TAG_VALID_MASK) == BYTRACE_TAG_ALWAYS) {
+        HiLog::Info(LABEL, "Get trace param notified value zero");
+    } else {
+        HiLog::Info(LABEL, "Get trace param notified value 0x%{public}" PRIx64, val);
+    }
 }
 
 void StartTrace(uint64_t label, const string& value, float limit)
