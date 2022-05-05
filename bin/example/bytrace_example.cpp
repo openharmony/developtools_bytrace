@@ -18,7 +18,7 @@
 #include <iostream>
 #include <thread>
 
-#include "bytrace.h"
+#include "hitrace_meter.h"
 
 using namespace std;
 namespace {

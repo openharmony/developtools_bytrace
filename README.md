@@ -20,7 +20,7 @@ ByTrace is a tool for you to trace processes and monitor performance. It encapsu
 ## Directory Structure<a name="section1610792125019"></a>
 
 ```
-/developtools/bytrace_standard
+/developtools/bytrace
 ├── bin           # ByTrace code
 │   └── include   # Header files
 │   └── src       # Source files

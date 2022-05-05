@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <zlib.h>
-#include "bytrace.h"
+#include "hitrace_meter.h"
 #include "bytrace_osal.h"
 #include "securec.h"
 

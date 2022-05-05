@@ -19,7 +19,7 @@
 #include <hilog/log.h>
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
-#include "bytrace.h"
+#include "hitrace_meter.h"
 #include "bytrace_napi_common.h"
 
 using namespace OHOS::HiviewDFX;

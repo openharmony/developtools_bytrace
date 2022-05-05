@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <gtest/gtest.h>
 #include <hilog/log.h>
-#include "bytrace.h"
+#include "hitrace_meter.h"
 #include "bytrace_osal.h"
 #include "parameters.h"
 
