@@ -50,13 +50,13 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     int taskId = 0;
     napi_get_value_int32(env, argv[1], &taskId);
     if (argc == ARGC_NUMBER_TWO) {
-        StartAsyncTrace(BYTRACE_TAG_APP, name, taskId);
+        StartAsyncTrace(HITRACE_TAG_APP, name, taskId);
     } else {
         NAPI_CALL(env, napi_typeof(env, argv[ARGC_NUMBER_TWO], &valueType));
         NAPI_ASSERT(env, valueType == napi_number, "Third arg type error, should is number");
         double limit = 0;
         napi_get_value_double(env, argv[ARGC_NUMBER_TWO], &limit);
-        StartAsyncTrace(BYTRACE_TAG_APP, name, taskId, limit);
+        StartAsyncTrace(HITRACE_TAG_APP, name, taskId, limit);
     }
     return nullptr;
 }
@@ -81,7 +81,7 @@ static napi_value JSTraceFinish(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, valueType == napi_number, "Second arg type error, should is number");
     int taskId = 0;
     napi_get_value_int32(env, argv[1], &taskId);
-    FinishAsyncTrace(BYTRACE_TAG_APP, name, taskId);
+    FinishAsyncTrace(HITRACE_TAG_APP, name, taskId);
     return nullptr;
 }
 
@@ -105,7 +105,7 @@ static napi_value JSTraceCount(napi_env env, napi_callback_info info)
     NAPI_ASSERT(env, valueType == napi_number, "Second arg type error, should is number");
     int64_t count = 0;
     napi_get_value_int64(env, argv[1], &count);
-    CountTrace(BYTRACE_TAG_APP, name, count);
+    CountTrace(HITRACE_TAG_APP, name, count);
     return nullptr;
 }
 

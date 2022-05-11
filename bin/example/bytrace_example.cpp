@@ -26,7 +26,7 @@ constexpr int SLEEP_ONE_SECOND = 1;
 constexpr int SLEEP_TWO_SECOND = 2;
 constexpr int CYCLE_TIMES = 5;
 constexpr int32_t TASK_ID = 111;
-constexpr uint64_t LABEL = BYTRACE_TAG_OHOS;
+constexpr uint64_t LABEL = HITRACE_TAG_OHOS;
 
 void FuncA()
 {
@@ -45,7 +45,7 @@ void FuncC()
     cout << "funcC" << endl;
     int num = 0;
     for (int i = 0; i < CYCLE_TIMES; i++) {
-        CountTrace(BYTRACE_TAG_OHOS, "count number", ++num);
+        CountTrace(HITRACE_TAG_OHOS, "count number", ++num);
         sleep(SLEEP_ONE_SECOND);
     }
 }

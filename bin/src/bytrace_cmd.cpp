@@ -840,28 +840,28 @@ static void InitKernelSupportTags()
 static void InitAllSupportTags()
 {
     // OHOS
-    g_tagMap["ohos"] = { "ohos", "OpenHarmony", BYTRACE_TAG_OHOS, USER, {}};
-    g_tagMap["ability"] = { "ability", "Ability Manager", BYTRACE_TAG_ABILITY_MANAGER, USER, {}};
-    g_tagMap["zcamera"] = { "zcamera", "OpenHarmony Camera Module", BYTRACE_TAG_ZCAMERA, USER, {}};
-    g_tagMap["zmedia"] = { "zmedia", "OpenHarmony Media Module", BYTRACE_TAG_ZMEDIA, USER, {}};
-    g_tagMap["zimage"] = { "zimage", "OpenHarmony Image Module", BYTRACE_TAG_ZIMAGE, USER, {}};
-    g_tagMap["zaudio"] = { "zaudio", "OpenHarmony Audio Module", BYTRACE_TAG_ZAUDIO, USER, {}};
+    g_tagMap["ohos"] = { "ohos", "OpenHarmony", HITRACE_TAG_OHOS, USER, {}};
+    g_tagMap["ability"] = { "ability", "Ability Manager", HITRACE_TAG_ABILITY_MANAGER, USER, {}};
+    g_tagMap["zcamera"] = { "zcamera", "OpenHarmony Camera Module", HITRACE_TAG_ZCAMERA, USER, {}};
+    g_tagMap["zmedia"] = { "zmedia", "OpenHarmony Media Module", HITRACE_TAG_ZMEDIA, USER, {}};
+    g_tagMap["zimage"] = { "zimage", "OpenHarmony Image Module", HITRACE_TAG_ZIMAGE, USER, {}};
+    g_tagMap["zaudio"] = { "zaudio", "OpenHarmony Audio Module", HITRACE_TAG_ZAUDIO, USER, {}};
     g_tagMap["distributeddatamgr"] = { "distributeddatamgr", "Distributed Data Manager",
-        BYTRACE_TAG_DISTRIBUTEDDATA, USER, {}};
-    g_tagMap["mdfs"] = { "mdfs", "Mobile Distributed File System", BYTRACE_TAG_MDFS, USER, {}};
-    g_tagMap["graphic"] = { "graphic", "Graphic Module", BYTRACE_TAG_GRAPHIC_AGP, USER, {}};
-    g_tagMap["ace"] = { "ace", "ACE development framework", BYTRACE_TAG_ACE, USER, {}};
-    g_tagMap["notification"] = { "notification", "Notification Module", BYTRACE_TAG_NOTIFICATION, USER, {}};
-    g_tagMap["misc"] = { "misc", "Misc Module", BYTRACE_TAG_MISC, USER, {}};
+        HITRACE_TAG_DISTRIBUTEDDATA, USER, {}};
+    g_tagMap["mdfs"] = { "mdfs", "Mobile Distributed File System", HITRACE_TAG_MDFS, USER, {}};
+    g_tagMap["graphic"] = { "graphic", "Graphic Module", HITRACE_TAG_GRAPHIC_AGP, USER, {}};
+    g_tagMap["ace"] = { "ace", "ACE development framework", HITRACE_TAG_ACE, USER, {}};
+    g_tagMap["notification"] = { "notification", "Notification Module", HITRACE_TAG_NOTIFICATION, USER, {}};
+    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
     g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module",
-        BYTRACE_TAG_MULTIMODALINPUT, USER, {}};
-    g_tagMap["sensors"] = { "sensors", "Sensors Module", BYTRACE_TAG_SENSORS, USER, {}};
-    g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", BYTRACE_TAG_MSDP, USER, {}};
-    g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", BYTRACE_TAG_DSOFTBUS, USER, {}};
-    g_tagMap["rpc"] = { "rpc", "RPC and IPC", BYTRACE_TAG_RPC, USER, {}};
-    g_tagMap["ark"] = { "ark", "ARK Module", BYTRACE_TAG_ARK, USER, {}};
-    g_tagMap["window"] = { "window", "Window Manager", BYTRACE_TAG_WINDOW_MANAGER, USER, {}};
-    g_tagMap["app"] = { "app", "APP Module", BYTRACE_TAG_APP, USER, {}};
+        HITRACE_TAG_MULTIMODALINPUT, USER, {}};
+    g_tagMap["sensors"] = { "sensors", "Sensors Module", HITRACE_TAG_SENSORS, USER, {}};
+    g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", HITRACE_TAG_MSDP, USER, {}};
+    g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", HITRACE_TAG_DSOFTBUS, USER, {}};
+    g_tagMap["rpc"] = { "rpc", "RPC and IPC", HITRACE_TAG_RPC, USER, {}};
+    g_tagMap["ark"] = { "ark", "ARK Module", HITRACE_TAG_ARK, USER, {}};
+    g_tagMap["window"] = { "window", "Window Manager", HITRACE_TAG_WINDOW_MANAGER, USER, {}};
+    g_tagMap["app"] = { "app", "APP Module", HITRACE_TAG_APP, USER, {}};
     g_tagMap["zbinder"] = { "zbinder", "OpenHarmony binder communication", 0, KERNEL, {
         { "events/zbinder/enable" },
     }};

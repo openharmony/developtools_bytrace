@@ -58,9 +58,9 @@ constexpr uint32_t TRACE_FMA11 = 11;
 constexpr uint32_t TRACE_FMA12 = 12;
 
 constexpr uint64_t TRACE_INVALIDATE_TAG = 0x1000000;
-constexpr uint64_t BYTRACE_TAG =  0xd03301;
-const constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, BYTRACE_TAG, "BYTRACE_TEST"};
-const uint64_t TAG = BYTRACE_TAG_OHOS;
+constexpr uint64_t HITRACE_TAG =  0xd03301;
+const constexpr OHOS::HiviewDFX::HiLogLabel LABEL = {LOG_CORE, HITRACE_TAG, "BYTRACE_TEST"};
+const uint64_t TAG = HITRACE_TAG_OHOS;
 static string g_traceRootPath;
 
 bool SetProperty(const string& property, const string& value);
