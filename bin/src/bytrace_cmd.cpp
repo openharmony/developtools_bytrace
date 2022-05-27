@@ -53,7 +53,7 @@ struct option g_longOptions[] = {
 const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 
-const string TRACE_TAG_PROPERTY = "debug.bytrace.tags.enableflags";
+const string TRACE_TAG_PROPERTY = "debug.hitrace.tags.enableflags";
 
 // various operating paths of ftrace
 const string TRACING_ON_PATH = "tracing_on";
