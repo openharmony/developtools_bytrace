@@ -36,9 +36,6 @@
         "//developtools/bytrace/interfaces/kits:jsapi_kits_target"
       ],
       "inner_kits": [
-      ],
-      "test": [
-        "//developtools/bytrace/bin/test:unittest"
       ]
     }
   }
