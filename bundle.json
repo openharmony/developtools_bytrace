@@ -20,8 +20,7 @@
     "deps": {
       "components": [
         "hilog",
-        "syspara",
-        "syspara_watchagent",
+        "init",
         "ipc",
         "utils_base"
       ],
