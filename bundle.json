@@ -19,10 +19,11 @@
     "ram": "720KB",
     "deps": {
       "components": [
-        "hilog",
+        "hitrace_native",
+        "hiviewdfx_hilog_native",
         "init",
         "ipc",
-        "utils_base"
+        "napi"
       ],
       "third_party": [
         "zlib"
