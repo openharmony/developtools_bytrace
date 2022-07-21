@@ -12,10 +12,10 @@
 @rem limitations under the License.
 
 @echo off
-hdc shell "echo > /sys/kernel/debug/tracing/trace"
-hdc shell "echo 4096 > /d/tracing/saved_cmdlines_size"
-hdc shell "bytrace -t 10 -b 4096 --overwrite ohos zimage zmedia zcamera zaudio ability distributeddatamgr sched freq irq workq  rs idle load disk pagecache memreclaim > /data/mynewtrace.ftrace"
-hdc shell "echo > /sys/kernel/debug/tracing/trace"
-hdc shell "sed -i '1,2d' /data/mynewtrace.ftrace"
-hdc pull /data/mynewtrace.ftrace .
+hdc_std shell "echo > /sys/kernel/debug/tracing/trace"
+hdc_std shell "echo 4096 > /sys/kernel/debug/tracing/saved_cmdlines_size"
+hdc_std shell "bytrace -t 10 -b 204800 --overwrite filemanagement gresource devicemanager deviceprofile dscreen dinput dhfwk accessibility dsched samgr ohos ace workq idle app ark ability binder disk distributeddatamgr dsoftbus freq graphic irq mdfs memory memreclaim misc mmc msdp multimodalinput notification pagecache regulators rpc sched sync window zaudio zcamera zimage zmedia > /data/local/tmp/data.ftrace"
+hdc_std shell "echo > /sys/kernel/debug/tracing/trace"
+hdc_std shell "sed -i '1,2d' /data/mynewtrace.ftrace"
+hdc_std file recv /data/mynewtrace.ftrace .
 pause

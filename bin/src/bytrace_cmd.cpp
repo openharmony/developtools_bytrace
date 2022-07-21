@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <zlib.h>
-#include "bytrace.h"
+#include "hitrace_meter.h"
 #include "bytrace_osal.h"
 #include "securec.h"
 
@@ -49,11 +49,12 @@ struct option g_longOptions[] = {
     { "trace_dump",        no_argument,       nullptr, 0 },
     { "list_categories",   no_argument,       nullptr, 0 },
     { "overwrite",         no_argument,       nullptr, 0 },
+    { nullptr,             0,                 nullptr, 0 },
 };
 const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 
-const string TRACE_TAG_PROPERTY = "debug.bytrace.tags.enableflags";
+const string TRACE_TAG_PROPERTY = "debug.hitrace.tags.enableflags";
 
 // various operating paths of ftrace
 const string TRACING_ON_PATH = "tracing_on";
@@ -80,7 +81,10 @@ bool g_compress = false;
 
 string g_traceRootPath;
 
-bool g_traceStart = true;
+const unsigned int START_NONE = 0;
+const unsigned int START_NORMAL = 1;
+const unsigned int START_ASYNC = 2;
+unsigned int g_traceStart = START_NORMAL;
 bool g_traceStop = true;
 bool g_traceDump = true;
 
@@ -436,15 +440,15 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
     } else if (!strcmp(g_longOptions[optionIndex].name, "overwrite")) {
         g_overwrite = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "trace_begin")) {
-        g_traceStart = true;
+        g_traceStart = START_ASYNC;
         g_traceStop = false;
         g_traceDump = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "trace_finish")) {
-        g_traceStart = false;
+        g_traceStart = START_NONE;
         g_traceStop = true;
         g_traceDump = true;
     } else if (!strcmp(g_longOptions[optionIndex].name, "trace_dump")) {
-        g_traceStart = false;
+        g_traceStart = START_NONE;
         g_traceStop = false;
         g_traceDump = true;
     }
@@ -561,11 +565,15 @@ static bool StartTrace()
     ClearTrace();
     printf("capturing trace...\n");
     fflush(stdout);
+    return true;
+}
+
+static void WaitForTraceDone(void)
+{
     struct timespec ts = {0, 0};
     ts.tv_sec = g_traceDuration;
     ts.tv_nsec = 0;
     while ((nanosleep(&ts, &ts) == -1) && (errno == EINTR)) {}
-    return true;
 }
 
 static bool StopTrace()
@@ -833,31 +841,45 @@ static void InitKernelSupportTags()
 static void InitAllSupportTags()
 {
     // OHOS
-    g_tagMap["ohos"] = { "ohos", "OpenHarmony", BYTRACE_TAG_OHOS, USER, {}};
-    g_tagMap["ability"] = { "ability", "Ability Manager", BYTRACE_TAG_ABILITY_MANAGER, USER, {}};
-    g_tagMap["zcamera"] = { "zcamera", "OpenHarmony Camera Module", BYTRACE_TAG_ZCAMERA, USER, {}};
-    g_tagMap["zmedia"] = { "zmedia", "OpenHarmony Media Module", BYTRACE_TAG_ZMEDIA, USER, {}};
-    g_tagMap["zimage"] = { "zimage", "OpenHarmony Image Module", BYTRACE_TAG_ZIMAGE, USER, {}};
-    g_tagMap["zaudio"] = { "zaudio", "OpenHarmony Audio Module", BYTRACE_TAG_ZAUDIO, USER, {}};
+    g_tagMap["ohos"] = { "ohos", "OpenHarmony", HITRACE_TAG_OHOS, USER, {}};
+    g_tagMap["ability"] = { "ability", "Ability Manager", HITRACE_TAG_ABILITY_MANAGER, USER, {}};
+    g_tagMap["zcamera"] = { "zcamera", "OpenHarmony Camera Module", HITRACE_TAG_ZCAMERA, USER, {}};
+    g_tagMap["zmedia"] = { "zmedia", "OpenHarmony Media Module", HITRACE_TAG_ZMEDIA, USER, {}};
+    g_tagMap["zimage"] = { "zimage", "OpenHarmony Image Module", HITRACE_TAG_ZIMAGE, USER, {}};
+    g_tagMap["zaudio"] = { "zaudio", "OpenHarmony Audio Module", HITRACE_TAG_ZAUDIO, USER, {}};
     g_tagMap["distributeddatamgr"] = { "distributeddatamgr", "Distributed Data Manager",
-        BYTRACE_TAG_DISTRIBUTEDDATA, USER, {}};
-    g_tagMap["mdfs"] = { "mdfs", "Mobile Distributed File System", BYTRACE_TAG_MDFS, USER, {}};
-    g_tagMap["graphic"] = { "graphic", "Graphic Module", BYTRACE_TAG_GRAPHIC_AGP, USER, {}};
-    g_tagMap["ace"] = { "ace", "ACE development framework", BYTRACE_TAG_ACE, USER, {}};
-    g_tagMap["notification"] = { "notification", "Notification Module", BYTRACE_TAG_NOTIFICATION, USER, {}};
-    g_tagMap["misc"] = { "misc", "Misc Module", BYTRACE_TAG_MISC, USER, {}};
+        HITRACE_TAG_DISTRIBUTEDDATA, USER, {}};
+    g_tagMap["mdfs"] = { "mdfs", "Mobile Distributed File System", HITRACE_TAG_MDFS, USER, {}};
+    g_tagMap["graphic"] = { "graphic", "Graphic Module", HITRACE_TAG_GRAPHIC_AGP, USER, {}};
+    g_tagMap["ace"] = { "ace", "ACE development framework", HITRACE_TAG_ACE, USER, {}};
+    g_tagMap["notification"] = { "notification", "Notification Module", HITRACE_TAG_NOTIFICATION, USER, {}};
+    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
     g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module",
-        BYTRACE_TAG_MULTIMODALINPUT, USER, {}};
-    g_tagMap["sensors"] = { "sensors", "Sensors Module", BYTRACE_TAG_SENSORS, USER, {}};
-    g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", BYTRACE_TAG_MSDP, USER, {}};
-    g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", BYTRACE_TAG_DSOFTBUS, USER, {}};
-    g_tagMap["rpc"] = { "rpc", "RPC and IPC", BYTRACE_TAG_RPC, USER, {}};
-    g_tagMap["ark"] = { "ark", "ARK Module", BYTRACE_TAG_ARK, USER, {}};
-    g_tagMap["window"] = { "window", "Window Manager", BYTRACE_TAG_WINDOW_MANAGER, USER, {}};
-    g_tagMap["app"] = { "app", "APP Module", BYTRACE_TAG_APP, USER, {}};
+        HITRACE_TAG_MULTIMODALINPUT, USER, {}};
+    g_tagMap["sensors"] = { "sensors", "Sensors Module", HITRACE_TAG_SENSORS, USER, {}};
+    g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", HITRACE_TAG_MSDP, USER, {}};
+    g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", HITRACE_TAG_DSOFTBUS, USER, {}};
+    g_tagMap["rpc"] = { "rpc", "RPC and IPC", HITRACE_TAG_RPC, USER, {}};
+    g_tagMap["ark"] = { "ark", "ARK Module", HITRACE_TAG_ARK, USER, {}};
+    g_tagMap["window"] = { "window", "Window Manager", HITRACE_TAG_WINDOW_MANAGER, USER, {}};
+    g_tagMap["accessibility"] = { "accessibility", "Accessibility Manager",
+        HITRACE_TAG_ACCESSIBILITY_MANAGER, USER, {}};
+    g_tagMap["account"] = { "account", "Account Manager", HITRACE_TAG_ACCOUNT_MANAGER, USER, {}};
+    g_tagMap["dhfwk"] = { "dhfwk", "Distributed Hardware FWK", HITRACE_TAG_DISTRIBUTED_HARDWARE_FWK, USER, {}};
+    g_tagMap["dscreen"] = { "dscreen", "Distributed Screen", HITRACE_TAG_DISTRIBUTED_SCREEN, USER, {}};
+    g_tagMap["dcamera"] = { "dcamera", "Distributed Camera", HITRACE_TAG_DISTRIBUTED_CAMERA, USER, {}};
+    g_tagMap["dinput"] = { "dinput", "Distributed Input", HITRACE_TAG_DISTRIBUTED_INPUT, USER, {}};
+    g_tagMap["devicemanager"] = { "devicemanager", "Device Manager", HITRACE_TAG_DEVICE_MANAGER, USER, {}};
+    g_tagMap["deviceprofile"] = { "deviceprofile", "Device Profile", HITRACE_TAG_DEVICE_PROFILE, USER, {}};
+    g_tagMap["dsched"] = { "dsched", "Distributed Schedule", HITRACE_TAG_DISTRIBUTED_SCHEDULE, USER, {}};
+    g_tagMap["samgr"] = { "samgr", "samgr", HITRACE_TAG_SAMGR, USER, {}};
+    g_tagMap["app"] = { "app", "APP Module", HITRACE_TAG_APP, USER, {}};
     g_tagMap["zbinder"] = { "zbinder", "OpenHarmony binder communication", 0, KERNEL, {
         { "events/zbinder/enable" },
     }};
+    g_tagMap["gresource"] = { "gresource", "Global Resource Manager", HITRACE_TAG_GLOBAL_RESMGR, USER, {}};
+    g_tagMap["power"] = { "power", "Power Manager", HITRACE_TAG_POWER, USER, {}};
+    g_tagMap["filemanagement"] = { "filemanagement", "filemanagement", HITRACE_TAG_FILEMANAGEMENT, USER, {}};
 
     // Kernel os
     InitKernelSupportTags();
@@ -895,9 +917,13 @@ int main(int argc, char **argv)
     }
 
     bool isTrue = true;
-    if (g_traceStart) {
+    if (g_traceStart != START_NONE) {
         SetViewStyle();
         isTrue = isTrue && StartTrace();
+        if (g_traceStart == START_ASYNC) {
+            return isTrue ? 0 : -1;
+        }
+        WaitForTraceDone();
     }
 
     isTrue = isTrue && MarkOthersClockSync();
