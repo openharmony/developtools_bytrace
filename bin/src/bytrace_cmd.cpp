@@ -866,6 +866,7 @@ static void InitAllSupportTags()
         HITRACE_TAG_ACCESSIBILITY_MANAGER, USER, {}};
     g_tagMap["account"] = { "account", "Account Manager", HITRACE_TAG_ACCOUNT_MANAGER, USER, {}};
     g_tagMap["dhfwk"] = { "dhfwk", "Distributed Hardware FWK", HITRACE_TAG_DISTRIBUTED_HARDWARE_FWK, USER, {}};
+    g_tagMap["daudio"] = { "daudio", "Distributed Audio", HITRACE_TAG_DISTRIBUTED_AUDIO, USER, {}};
     g_tagMap["dscreen"] = { "dscreen", "Distributed Screen", HITRACE_TAG_DISTRIBUTED_SCREEN, USER, {}};
     g_tagMap["dcamera"] = { "dcamera", "Distributed Camera", HITRACE_TAG_DISTRIBUTED_CAMERA, USER, {}};
     g_tagMap["dinput"] = { "dinput", "Distributed Input", HITRACE_TAG_DISTRIBUTED_INPUT, USER, {}};
