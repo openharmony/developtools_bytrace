@@ -24,6 +24,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <map>
 #include <fcntl.h>
 #include <getopt.h>
 #include <sys/stat.h>
