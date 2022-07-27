@@ -14,7 +14,7 @@
  */
 
 #include "bytrace_osal.h"
-#include "hitrace_meter.h"
+//#include "hitrace_meter.h"
 #include "parameters.h"
 
 namespace OHOS {

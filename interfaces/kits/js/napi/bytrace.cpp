@@ -14,9 +14,9 @@
  */
 
 #include <cstdio>
-#include <cstdlib>
-#include <string>
-#include <hilog/log.h>
+//#include <cstdlib>
+//#include <string>
+//#include <hilog/log.h>
 #include "bytrace_napi_common.h"
 
 using namespace OHOS::Developtools::BytraceNapi;

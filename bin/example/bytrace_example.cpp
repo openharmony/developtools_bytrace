@@ -17,7 +17,6 @@
 #include <unistd.h>
 #include <iostream>
 #include <thread>
-
 #include "hitrace_meter.h"
 
 using namespace std;

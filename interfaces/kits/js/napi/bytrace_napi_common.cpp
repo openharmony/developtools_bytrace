@@ -14,12 +14,12 @@
  */
 
 #include <cstdio>
-#include <cstdlib>
+// #include <cstdlib>
 #include <functional>
 #include <string>
 #include <hilog/log.h>
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
+// #include "napi/native_api.h"
+// #include "napi/native_node_api.h"
 #include "hitrace_meter.h"
 #include "bytrace_napi_common.h"
 
