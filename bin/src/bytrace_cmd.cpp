@@ -16,8 +16,6 @@
 #include <cinttypes>
 #include <csignal>
 #include <cstdio>
-//#include <cstdlib>
-//#include <cstring>
 #include <ctime>
 #include <fstream>
 #include <regex>
@@ -28,7 +26,6 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <sys/stat.h>
-//#include <sys/types.h>
 #include <unistd.h>
 #include <zlib.h>
 #include "hitrace_meter.h"
