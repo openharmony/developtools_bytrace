@@ -17,7 +17,6 @@
 #define BIN_INCLUDE_BYTRACE_CAPTURE_H
 
 #include <string>
-#include <map>
 
 namespace OHOS {
 namespace Developtools {
