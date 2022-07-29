@@ -168,13 +168,11 @@ static napi_value JSTraceCount(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
-namespace OHOS {
-namespace Developtools {
-namespace BytraceNapi {
 /*
  * function for module exports
  */
-napi_value BytraceInit(napi_env env, napi_value exports)
+EXTERN_C_START
+static napi_value BytraceInit(napi_env env, napi_value exports)
 {
     static napi_property_descriptor desc[] = {
         DECLARE_NAPI_FUNCTION("startTrace", JSTraceStart),
@@ -184,6 +182,25 @@ napi_value BytraceInit(napi_env env, napi_value exports)
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }
-}
-}
+EXTERN_C_END
+
+/*
+ * bytrace module definition
+ */
+static napi_module bytrace_module = {
+    .nm_version = 1,
+    .nm_flags = 0,
+    .nm_filename = "bytrace",
+    .nm_register_func = BytraceInit,
+    .nm_modname = "bytrace",
+    .nm_priv = ((void *)0),
+    .reserved = {0}
+};
+
+/*
+ * Module registration
+ */
+extern "C" __attribute__((constructor)) void RegisterModule(void)
+{
+    napi_module_register(&bytrace_module);
 }
