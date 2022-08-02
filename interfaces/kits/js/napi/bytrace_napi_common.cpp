@@ -118,6 +118,7 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     size_t argc = ARGC_NUMBER_THREE;
     napi_value argv[ARGC_NUMBER_THREE];
     ParseParams(env, info, argc, argv);
+    NAPI_ASSERT(env, argc == ARGC_NUMBER_TWO || argc == ARGC_NUMBER_THREE, "Wrong number of arguments");
     if (argc != ARGC_NUMBER_TWO && argc != ARGC_NUMBER_THREE) {
         HiLog::Error(LABEL, "Wrong number of parameters.");
         return nullptr;
@@ -144,6 +145,11 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
 
 static napi_value JSTraceFinish(napi_env env, napi_callback_info info)
 {
+    size_t argc = ARGC_NUMBER_TWO;
+    napi_value argv[ARGC_NUMBER_TWO];
+    napi_value thisVar;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    NAPI_ASSERT(env, argc == ARGC_NUMBER_TWO, "Wrong number of arguments");
     (void)JsStrNumParamsFunc(env, info, [&env] (std::string name, napi_value& nValue) -> bool {
         int taskId = 0;
         if (!ParseInt32Param(env, nValue, taskId)) {
@@ -157,6 +163,11 @@ static napi_value JSTraceFinish(napi_env env, napi_callback_info info)
 
 static napi_value JSTraceCount(napi_env env, napi_callback_info info)
 {
+    size_t argc = ARGC_NUMBER_TWO;
+    napi_value argv[ARGC_NUMBER_TWO];
+    napi_value thisVar;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
+    NAPI_ASSERT(env, argc == ARGC_NUMBER_TWO, "Wrong number of arguments");
     (void)JsStrNumParamsFunc(env, info, [&env] (std::string name, napi_value& nValue) -> bool {
         int64_t count = 0;
         if (!ParseInt64Param(env, nValue, count)) {
