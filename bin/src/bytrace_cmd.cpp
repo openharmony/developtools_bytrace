@@ -51,6 +51,7 @@ struct option g_longOptions[] = {
 };
 const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
+const int SHELL_UID = 2000;
 
 const string TRACE_TAG_PROPERTY = "debug.hitrace.tags.enableflags";
 
@@ -897,7 +898,7 @@ static void InterruptExit(int signo)
 
 int main(int argc, char **argv)
 {
-    setgid(2000);
+    setgid(SHELL_UID);
     (void)signal(SIGKILL, InterruptExit);
     (void)signal(SIGINT, InterruptExit);
 
