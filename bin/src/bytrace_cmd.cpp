@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <getopt.h>
 #include <sys/stat.h>
+#include <thread>
 #include <unistd.h>
 #include <zlib.h>
 #include "hitrace_meter.h"
@@ -52,6 +53,7 @@ struct option g_longOptions[] = {
 const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 const int SHELL_UID = 2000;
+const int WAIT_MILLISECONDS = 10;
 
 const string TRACE_TAG_PROPERTY = "debug.hitrace.tags.enableflags";
 
@@ -134,6 +136,7 @@ static bool WriteStrToFile(const string& filename, const std::string& str)
         out.close();
         return false;
     }
+    out.flush();
     out.close();
     return true;
 }
@@ -176,7 +179,7 @@ static bool IsTagSupported(const string& name)
 static string CanonicalizeSpecPath(const char* src)
 {
     if (src == nullptr || strlen(src) >= PATH_MAX) {
-        fprintf(stderr, "Error: CanonicalizeSpecPath %s failed", src);
+        fprintf(stderr, "Error: CanonicalizeSpecPath %s failed\n", src);
         return "";
     }
     char resolvedPath[PATH_MAX] = { 0 };
@@ -188,18 +191,18 @@ static string CanonicalizeSpecPath(const char* src)
 #else
     if (access(src, F_OK) == 0) {
         if (realpath(src, resolvedPath) == nullptr) {
-            fprintf(stderr, "Error: realpath %s failed", src);
+            fprintf(stderr, "Error: realpath %s failed\n", src);
             return "";
         }
     } else {
         string fileName(src);
         if (fileName.find("..") == string::npos) {
             if (sprintf_s(resolvedPath, PATH_MAX, "%s", src) == -1) {
-                fprintf(stderr, "Error: sprintf_s %s failed", src);
+                fprintf(stderr, "Error: sprintf_s %s failed\n", src);
                 return "";
             }
         } else {
-            fprintf(stderr, "Error: find .. %s failed", src);
+            fprintf(stderr, "Error: find .. %s failed\n", src);
             return "";
         }
     }
@@ -329,22 +332,24 @@ static bool ClearUserSpaceSettings()
 
 static bool SetKernelSpaceSettings()
 {
-    bool isTrue = SetBufferSize(g_bufferSizeKB) && SetClock(g_clock) &&
-        SetOverWriteEnable(g_overwrite) && DisableAllFtraceEvents();
+    if (!(SetBufferSize(g_bufferSizeKB) && SetClock(g_clock) &&
+        SetOverWriteEnable(g_overwrite) && SetTgidEnable(true))) {
+        fprintf(stderr, "Set trace kernel settings failed\n");
+        return false;
+    }
+    if (DisableAllFtraceEvents() == false) {
+        fprintf(stderr, "Pre-clear kernel tracers failed\n");
+        return false;
+    }
     for (const auto& path : g_kernelEnabledPaths) {
         SetFtraceEnabled(path, true);
     }
-    return isTrue;
+    return true;
 }
 
 static bool ClearKernelSpaceSettings()
 {
     return DisableAllFtraceEvents() && SetOverWriteEnable(true) && SetBufferSize(1) && SetClock("boot");
-}
-
-static bool SetViewStyle()
-{
-    return SetTgidEnable(true);
 }
 
 static void ShowListCategory()
@@ -932,30 +937,34 @@ int main(int argc, char **argv)
         exit(-1);
     }
 
-    if (!SetKernelSpaceSettings()) {
-        ClearKernelSpaceSettings();
-        exit(-1);
-    }
-
-    if (!SetUserSpaceSettings()) {
-        ClearKernelSpaceSettings();
-        ClearUserSpaceSettings();
-        exit(-1);
+    if (g_traceStart != START_NONE) {
+        if (!SetKernelSpaceSettings()) {
+            ClearKernelSpaceSettings();
+            exit(-1);
+        }
     }
 
     bool isTrue = true;
     if (g_traceStart != START_NONE) {
-        SetViewStyle();
         isTrue = isTrue && StartTrace();
+        if (!SetUserSpaceSettings()) {
+            ClearKernelSpaceSettings();
+            ClearUserSpaceSettings();
+            exit(-1);
+        }
         if (g_traceStart == START_ASYNC) {
             return isTrue ? 0 : -1;
         }
         WaitForTraceDone();
     }
 
+    // following is dump and stop handling
     isTrue = isTrue && MarkOthersClockSync();
 
     if (g_traceStop) {
+        // clear user tags first and sleep a little to let apps already be notified.
+        ClearUserSpaceSettings();
+        std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));        
         isTrue = isTrue && StopTrace();
     }
 
@@ -980,8 +989,9 @@ int main(int argc, char **argv)
         ClearTrace();
     }
 
-    ClearUserSpaceSettings();
-    ClearKernelSpaceSettings();
-
+    if (g_traceStop) {
+        // clear kernel setting including clock type after dump(MUST) and tracing_on is off.
+        ClearKernelSpaceSettings();
+    }
     return isTrue ? 0 : -1;
 }
