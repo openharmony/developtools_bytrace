@@ -62,6 +62,7 @@ ohos_prebuilt_etc("bytrace.cfg") {
 ohos_executable("bytrace_example") {
   sources = [ "example/bytrace_example.cpp" ]
   external_deps = [ "hitrace_native:hitrace_meter" ]
+  install_enable = false
   subsystem_name = "developtools"
   part_name = "bytrace"
 }
