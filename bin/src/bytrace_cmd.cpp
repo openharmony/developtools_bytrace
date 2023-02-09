@@ -911,6 +911,7 @@ static void InitAllSupportTags()
     g_tagMap["net"] = {"net", "net", HITRACE_TAG_NET, USER, {}};
     g_tagMap["accesscontrol"] = {"accesscontrol", "Access Control Module", HITRACE_TAG_ACCESS_CONTROL, USER, {}};
     g_tagMap["interconn"] = {"interconn", "Interconnection subsystem", HITRACE_TAG_INTERCONNECTION, USER, {}};
+    g_tagMap["commonlibrary"] = {"commonlibrary", "Commonlibrary subsystem", HITRACE_TAG_COMMONLIBRARY, USER, {}};
 
     // Kernel os
     InitKernelSupportTags();
