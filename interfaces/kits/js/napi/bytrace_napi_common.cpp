@@ -96,10 +96,8 @@ bool ParseDoubleParam(const napi_env& env, const napi_value& value, double& dest
 bool ParseUndefinedParam(const napi_env& env, const napi_value& value)
 {
     if (!TypeCheck(env, value, napi_undefined)) {
-        HiLog::Error(LABEL, "TypeCheck not passed.");
         return false;
     }
-    HiLog::Error(LABEL, "TypeCheck passed.");
     return true;
 }
 
@@ -145,10 +143,9 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     } else {
         double limit = 0.0;
         if (!ParseDoubleParam(env, argv[THIRD_ARG_INDEX], limit) && !ParseUndefinedParam(env, argv[THIRD_ARG_INDEX])) {
-            HiLog::Error(LABEL, "!ParseDoubleParam && !ParseUndefinedParam.");
+            HiLog::Error(LABEL, "ParseDoubleParam false and ParseUndefinedParam false.");
             return nullptr;
         }
-        HiLog::Error(LABEL, "invoke StartAsyncTrace.");
         StartAsyncTrace(HITRACE_TAG_APP, name, taskId, limit);
     }
     return nullptr;
