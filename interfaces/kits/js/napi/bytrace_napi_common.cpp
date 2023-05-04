@@ -95,10 +95,7 @@ bool ParseDoubleParam(const napi_env& env, const napi_value& value, double& dest
 
 bool ParseUndefinedParam(const napi_env& env, const napi_value& value)
 {
-    if (!TypeCheck(env, value, napi_undefined)) {
-        return false;
-    }
-    return true;
+    return TypeCheck(env, value, napi_undefined);
 }
 
 bool JsStrNumParamsFunc(napi_env& env, napi_callback_info& info, STR_NUM_PARAM_FUNC nativeCall)
