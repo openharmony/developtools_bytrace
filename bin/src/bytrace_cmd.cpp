@@ -42,7 +42,7 @@ struct option g_longOptions[] = {
     { "trace_clock",       required_argument, nullptr, 0 },
     { "help",              no_argument,       nullptr, 0 },
     { "output",            required_argument, nullptr, 0 },
-    { "time",              required_argument, nullptr, 0 },
+    { "time",              required_argument, nullptr, 0 }, // used to specify the time (in seconds) for trace to run.
     { "trace_begin",       no_argument,       nullptr, 0 },
     { "trace_finish",      no_argument,       nullptr, 0 },
     { "trace_dump",        no_argument,       nullptr, 0 },
@@ -50,6 +50,7 @@ struct option g_longOptions[] = {
     { "overwrite",         no_argument,       nullptr, 0 },
     { nullptr,             0,                 nullptr, 0 },
 };
+// char range
 const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 const int SHELL_UID = 2000;
@@ -73,14 +74,14 @@ const int MIN_BUFFER_SIZE = 256;
 const int MAX_BUFFER_SIZE = 307200; // 300 MB
 constexpr unsigned int MAX_OUTPUT_LEN = 255;
 const int PAGE_SIZE_KB = 4; // 4 KB
-int g_traceDuration = 5;
+int g_traceDuration = 5; // g_traceDuration
 int g_bufferSizeKB = 2048;
 string g_clock = "boot";
 bool g_overwrite = true;
 string g_outputFile;
 bool g_compress = false;
 
-string g_traceRootPath;
+string g_traceRootPath; // g_traceRootPath
 
 const unsigned int START_NONE = 0;
 const unsigned int START_NORMAL = 1;
@@ -89,7 +90,7 @@ unsigned int g_traceStart = START_NORMAL;
 bool g_traceStop = true;
 bool g_traceDump = true;
 
-map<string, TagCategory> g_tagMap;
+map<string, TagCategory> g_tagMap; // stored tags
 vector<uint64_t> g_userEnabledTags;
 vector<string> g_kernelEnabledPaths;
 }
@@ -98,7 +99,7 @@ static bool IsTraceMounted()
 {
     const string debugfsPath = "/sys/kernel/debug/tracing/";
     const string tracefsPath = "/sys/kernel/tracing/";
-
+    // find debugfsPath first
     if (access((debugfsPath + TRACE_MARKER_PATH).c_str(), F_OK) != -1) {
         g_traceRootPath = debugfsPath;
         return true;
@@ -108,18 +109,18 @@ static bool IsTraceMounted()
         return true;
     }
 
-    (void)fprintf(stderr, "Error: Did not find trace folder\n");
+    (void)fprintf(stderr, "Error: Did not find trace folder.\n"); // can't find trace folder
     return false;
 }
 
 static bool IsFileExit(const string& filename)
 {
-    return access((g_traceRootPath + filename).c_str(), F_OK) != -1;
+    return access((g_traceRootPath + filename).c_str(), F_OK) != -1; // verify if the file exists
 }
 
 static bool IsWritableFile(const string& filename)
 {
-    return access((g_traceRootPath + filename).c_str(), W_OK) != -1;
+    return access((g_traceRootPath + filename).c_str(), W_OK) != -1; // verify if the file writable
 }
 
 static bool WriteStrToFile(const string& filename, const std::string& str)
@@ -127,6 +128,7 @@ static bool WriteStrToFile(const string& filename, const std::string& str)
     ofstream out;
     out.open(g_traceRootPath + filename, ios::out);
     if (out.fail()) {
+        // can't open the file
         fprintf(stderr, "Error: Did not open %s\n", filename.c_str());
         return false;
     }
@@ -136,6 +138,7 @@ static bool WriteStrToFile(const string& filename, const std::string& str)
         out.close();
         return false;
     }
+    // release resources
     out.flush();
     out.close();
     return true;
@@ -143,13 +146,14 @@ static bool WriteStrToFile(const string& filename, const std::string& str)
 
 static bool SetFtraceEnabled(const string& path, bool enabled)
 {
-    return WriteStrToFile(path, enabled ? "1" : "0");
+    return WriteStrToFile(path, enabled ? "1" : "0"); // write 1 or 0 to file
 }
 
 static bool IsTagSupported(const string& name)
 {
     auto it = g_tagMap.find(name);
     if (it == g_tagMap.end()) {
+        // can't find item from map
         return false;
     }
 
@@ -169,8 +173,7 @@ static bool IsTagSupported(const string& name)
             g_kernelEnabledPaths.push_back(path);
             findPath = true;
         } else if (IsFileExit(path)) {
-            fprintf(stderr, "Warning: category \"%s\" requires root "
-                "privileges.\n", name.c_str());
+            fprintf(stderr, "Warning: category \"%s\" requires root privileges.\n", name.c_str());
         }
     }
     return findPath;
@@ -178,6 +181,7 @@ static bool IsTagSupported(const string& name)
 
 static string CanonicalizeSpecPath(const char* src)
 {
+    // PATH_MAX is 4096, defined in linux/limits.h
     if (src == nullptr || strlen(src) >= PATH_MAX) {
         fprintf(stderr, "Error: CanonicalizeSpecPath %s failed\n", src);
         return "";
@@ -190,11 +194,13 @@ static string CanonicalizeSpecPath(const char* src)
     }
 #else
     if (access(src, F_OK) == 0) {
+        // function to find the absolute path of a file in the directory
         if (realpath(src, resolvedPath) == nullptr) {
             fprintf(stderr, "Error: realpath %s failed\n", src);
             return "";
         }
     } else {
+        // trace_clock file doesn't exist
         string fileName(src);
         if (fileName.find("..") == string::npos) {
             if (sprintf_s(resolvedPath, PATH_MAX, "%s", src) == -1) {
@@ -202,17 +208,19 @@ static string CanonicalizeSpecPath(const char* src)
                 return "";
             }
         } else {
+            // find file failed
             fprintf(stderr, "Error: find .. %s failed\n", src);
             return "";
         }
     }
 #endif
     string res(resolvedPath);
-    return res;
+    return res; // return the string
 }
 
 static string ReadFile(const string& filename)
 {
+    // standardize file paths
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + filename).c_str());
     ifstream fin(resolvedPath.c_str());
     if (!fin.is_open()) {
@@ -221,6 +229,7 @@ static string ReadFile(const string& filename)
     }
 
     string str((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+    // close a file handle
     fin.close();
     return str;
 }
@@ -228,6 +237,7 @@ static string ReadFile(const string& filename)
 static bool SetBufferSize(int bufferSize)
 {
     if (!WriteStrToFile(CURRENT_TRACER_PATH, "nop")) {
+        // process for current_tracer file does not have permission
         fprintf(stderr, "Error: write \"nop\" to %s\n", CURRENT_TRACER_PATH.c_str());
     }
     return WriteStrToFile(BUFFER_SIZE_PATH, to_string(bufferSize));
@@ -239,6 +249,7 @@ static bool SetClock(const string& timeclock)
     size_t begin = allClocks.find("[");
     size_t end = allClocks.find("]");
     string newClock;
+    // if the clock to be set is the same as the existing clock, it will not be set
     if (begin != string::npos && end != string::npos &&
         timeclock.compare(0, timeclock.size(), allClocks, begin + 1, end - begin - 1) == 0) {
         return true;
@@ -246,14 +257,12 @@ static bool SetClock(const string& timeclock)
         newClock = timeclock;
     } else if (allClocks.find("boot") != string::npos) {
         // boot: This is the boot clock (CLOCK_BOOTTIME) and is based on the fast monotonic clock,
-        // but also accounts for time in suspend.
         newClock = "boot";
     } else if (allClocks.find("mono") != string::npos) {
         // mono: uses the fast monotonic clock (CLOCK_MONOTONIC)
         // which is monotonic and is subject to NTP rate adjustments.
         newClock = "mono";
     } else if (allClocks.find("global") != string::npos) {
-        // global: is in sync with all CPUs but may be a bit slower than the local clock.
         newClock = "global";
     } else {
         fprintf(stderr, "You can set trace clock in %s\n", allClocks.c_str());
@@ -278,6 +287,7 @@ static bool SetTgidEnable(bool enabled)
 static bool DisableAllFtraceEvents()
 {
     bool isTrue = true;
+    // DisableAllFtraceEvents
     for (auto it = g_tagMap.begin(); it != g_tagMap.end(); ++it) {
         TagCategory tag = it->second;
         if (tag.type != KERNEL) {
@@ -286,7 +296,7 @@ static bool DisableAllFtraceEvents()
         for (int i = 0; i < MAX_SYS_FILES; i++) {
             const string path = tag.sysfiles[i].path;
             if ((path.size() > 0) && IsWritableFile(path)) {
-                isTrue = isTrue && SetFtraceEnabled(path, false);
+                isTrue = isTrue && SetFtraceEnabled(path, false); // set false to ftraceEnabled
             }
         }
     }
@@ -295,6 +305,7 @@ static bool DisableAllFtraceEvents()
 
 static bool SetProperty(const string& property, const string& value)
 {
+    // set the system property
     return SetPropertyInner(property, value);
 }
 
@@ -307,7 +318,7 @@ static bool SetTraceTagsEnabled(uint64_t tags)
 static bool RefreshServices()
 {
     bool res = false;
-
+    // refresh binderServices
     res = RefreshBinderServices();
     if (!res) {
         return res;
@@ -318,6 +329,7 @@ static bool RefreshServices()
 
 static bool SetUserSpaceSettings()
 {
+    // set userSpace settings
     uint64_t enabledTags = 0;
     for (auto tag: g_userEnabledTags) {
         enabledTags |= tag;
@@ -327,19 +339,21 @@ static bool SetUserSpaceSettings()
 
 static bool ClearUserSpaceSettings()
 {
+    // clear userSpace settings
     return SetTraceTagsEnabled(0) && RefreshServices();
 }
 
 static bool SetKernelSpaceSettings()
 {
+    // set kernelSpace settings
     if (!(SetBufferSize(g_bufferSizeKB) && SetClock(g_clock) &&
         SetOverWriteEnable(g_overwrite) && SetTgidEnable(true))) {
-        fprintf(stderr, "Set trace kernel settings failed\n");
+        fprintf(stderr, "Set trace kernel settings failed.\n");
         return false;
     }
     if (DisableAllFtraceEvents() == false) {
-        fprintf(stderr, "Pre-clear kernel tracers failed\n");
-        return false;
+        fprintf(stderr, "Pre-clear kernel tracers failed.\n");
+        return false; // pre-clear kernel tracers failed
     }
     for (const auto& path : g_kernelEnabledPaths) {
         SetFtraceEnabled(path, true);
@@ -349,6 +363,7 @@ static bool SetKernelSpaceSettings()
 
 static bool ClearKernelSpaceSettings()
 {
+    // clear kernelSpace settings
     return DisableAllFtraceEvents() && SetOverWriteEnable(true) && SetBufferSize(1) && SetClock("boot");
 }
 
@@ -356,7 +371,7 @@ static void ShowListCategory()
 {
     printf("  %18s   description:\n", "tagName:");
     for (auto it = g_tagMap.begin(); it != g_tagMap.end(); ++it) {
-        string key = it->first;
+        string key = it->first; // show categorys
         TagCategory tag = it->second;
         if (IsTagSupported(key)) {
             printf("  %18s - %s\n", tag.name.c_str(), tag.description.c_str());
@@ -395,12 +410,36 @@ static void ShowHelp(const string& cmd)
 template <typename T>
 inline bool StrToNum(const std::string& sString, T &tX)
 {
+    // str to num
     std::istringstream iStream(sString);
     return (iStream >> tX) ? true : false;
 }
 
-static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
-{
+static bool ParseControlOpt(int optionIndex, bool& isTrue) {
+    if (!strcmp(g_longOptions[optionIndex].name, "trace_begin")) {
+        g_traceStart = START_ASYNC;
+        g_traceStop = false;
+        g_traceDump = false;
+        return true;
+    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_finish")) {
+        g_traceStart = START_NONE;
+        g_traceStop = true;
+        g_traceDump = true;
+        return true;
+    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_dump")) {
+        g_traceStart = START_NONE;
+        g_traceStop = false;
+        g_traceDump = true;
+        return true;
+    } else if (!strcmp(g_longOptions[optionIndex].name, "list_categories")) {
+        ShowListCategory();
+        isTrue = false;
+        return true;
+    }
+    return false;
+}
+
+static bool ParseBufferSizeOpt(int optionIndex, bool& isTrue) {
     if (!strcmp(g_longOptions[optionIndex].name, "buffer_size")) {
         if (!StrToNum(optarg, g_bufferSizeKB)) {
             fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
@@ -410,7 +449,13 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
             isTrue = false;
         }
         g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_clock")) {
+        return true;
+    }
+    return false;
+}
+
+static bool ParseTraceClockOpt(int optionIndex, bool& isTrue) {
+    if (!strcmp(g_longOptions[optionIndex].name, "trace_clock")) {
         regex re("[a-zA-Z]{4,6}");
         if (regex_match(optarg, re)) {
             g_clock = optarg;
@@ -418,7 +463,31 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
             fprintf(stderr, "Error: \"--trace_clock\" is illegal input. eg: \"--trace_clock boot\"\n");
             isTrue = false;
         }
-    } else if (!strcmp(g_longOptions[optionIndex].name, "help")) {
+        return true;
+    } else if (!strcmp(g_longOptions[optionIndex].name, "overwrite")) {
+        g_overwrite = false;
+        return true;
+    }
+    return false;
+}
+
+static bool ParseOutputOpt(int optionIndex, bool& isTrue) {
+    if (!strcmp(g_longOptions[optionIndex].name, "output")) {
+        struct stat buf;
+        size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
+        if (len == MAX_OUTPUT_LEN || len < 1 || (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
+            fprintf(stderr, "Error: output file is illegal\n");
+            isTrue = false;
+        } else {
+            g_outputFile = optarg;
+        }
+        return true;
+    }
+    return false;
+}
+
+static void ParseHelpTimeOpt(const string& cmd, int optionIndex, bool& isTrue) {
+    if (!strcmp(g_longOptions[optionIndex].name, "help")) {
         ShowHelp(cmd);
         isTrue = false;
     } else if (!strcmp(g_longOptions[optionIndex].name, "time")) {
@@ -429,10 +498,68 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
             fprintf(stderr, "Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
             isTrue = false;
         }
-    } else if (!strcmp(g_longOptions[optionIndex].name, "list_categories")) {
+    }
+}
+
+static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
+{
+    bool isFinish = ParseControlOpt(optionIndex, isTrue);
+    if (isFinish) {
+        return;
+    }
+    isFinish = ParseTraceClockOpt(optionIndex, isTrue);
+    if (isFinish) {
+        return;
+    }
+    isFinish = ParseOutputOpt(optionIndex, isTrue);
+    if (isFinish) {
+        return;
+    }
+    ParseHelpTimeOpt(cmd, optionIndex, isTrue);
+}
+
+static bool ParseBOpt(int opt, bool& isTrue)
+{
+    if (opt == 'b') {
+        if (!StrToNum(optarg, g_bufferSizeKB)) {
+            fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
+            isTrue = false;
+        } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
+            fprintf(stderr, "Error: buffer size must be from 256 KB to 300 MB. eg: \"--buffer_size 1024\"\n");
+            isTrue = false;
+        }
+        g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
+        return true;
+    }
+    return false;
+}
+
+static bool ParseHltOpt(int opt, char** argv, bool& isTrue)
+{
+    if (opt == 'h') {
+        ShowHelp(argv[0]);
+        isTrue = false;
+        return true;
+    } else if (opt == 'l') {
         ShowListCategory();
         isTrue = false;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "output")) {
+        return true;
+    } else if (opt == 't') {
+        if (!StrToNum(optarg, g_traceDuration)) {
+            fprintf(stderr, "Error: the time is illegal input. eg: \"--time 5\"\n");
+            isTrue = false;
+        } else if (g_traceDuration < 1) {
+            fprintf(stderr, "Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
+            isTrue = false;
+        }
+        return true;
+    }
+    return false;
+}
+
+static bool ParseOzOpt(int opt, char** argv, bool& isTrue)
+{
+    if (opt == 'o') {
         struct stat buf;
         size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
         if (len == MAX_OUTPUT_LEN || len < 1 || (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
@@ -441,78 +568,40 @@ static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
         } else {
             g_outputFile = optarg;
         }
-    } else if (!strcmp(g_longOptions[optionIndex].name, "overwrite")) {
-        g_overwrite = false;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_begin")) {
-        g_traceStart = START_ASYNC;
-        g_traceStop = false;
-        g_traceDump = false;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_finish")) {
-        g_traceStart = START_NONE;
-        g_traceStop = true;
-        g_traceDump = true;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_dump")) {
-        g_traceStart = START_NONE;
-        g_traceStop = false;
-        g_traceDump = true;
+        return true;
+    } else if (opt == 'z') {
+        g_compress = true;
+        return true;
+    }
+    return false;
+}
+
+static void ParseDefaultOpt(int opt, char** argv, int optIndex, bool& isTrue)
+{
+    if (opt == 0) {
+        ParseLongOpt(argv[0], optIndex, isTrue);
+    } else {
+        ShowHelp(argv[0]);
+        isTrue = false;
     }
 }
 
 static bool ParseOpt(int opt, char** argv, int optIndex)
 {
     bool isTrue = true;
-    switch (opt) {
-        case 'b': {
-            if (!StrToNum(optarg, g_bufferSizeKB)) {
-                fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
-                isTrue = false;
-            } else if (g_bufferSizeKB < MIN_BUFFER_SIZE || g_bufferSizeKB > MAX_BUFFER_SIZE) {
-                fprintf(stderr, "Error: buffer size must be from 256 KB to 300 MB. eg: \"--buffer_size 1024\"\n");
-                isTrue = false;
-            }
-            g_bufferSizeKB = g_bufferSizeKB / PAGE_SIZE_KB * PAGE_SIZE_KB;
-            break;
-        }
-        case 'h':
-            ShowHelp(argv[0]);
-            isTrue = false;
-            break;
-        case 'l':
-            ShowListCategory();
-            isTrue = false;
-            break;
-        case 't': {
-            if (!StrToNum(optarg, g_traceDuration)) {
-                fprintf(stderr, "Error: the time is illegal input. eg: \"--time 5\"\n");
-                isTrue = false;
-            } else if (g_traceDuration < 1) {
-                fprintf(stderr, "Error: \"-t %s\" to be greater than zero. eg: \"--time 5\"\n", optarg);
-                isTrue = false;
-            }
-            break;
-        }
-        case 'o': {
-            struct stat buf;
-            size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
-            if (len == MAX_OUTPUT_LEN || len < 1 || (stat(optarg, &buf) == 0 && (buf.st_mode & S_IFDIR))) {
-                fprintf(stderr, "Error: output file is illegal\n");
-                isTrue = false;
-            } else {
-                g_outputFile = optarg;
-            }
-            break;
-        }
-        case 'z':
-            g_compress = true;
-            break;
-        case 0: // long options
-            ParseLongOpt(argv[0], optIndex, isTrue);
-            break;
-        default:
-            ShowHelp(argv[0]);
-            isTrue = false;
-            break;
+    bool isFinish = ParseBOpt(opt, isTrue);
+    if (isFinish) {
+        return isTrue;
     }
+    isFinish = ParseHlOpt(opt, argv, isTrue);
+    if (isFinish) {
+        return isTrue;
+    }
+    isFinish = ParseOzOpt(opt, isTrue);
+    if (isFinish) {
+        return isTrue;
+    }
+    ParseDefaultOpt(opt, argv, optIndex, isTrue);
     return isTrue;
 }
 
@@ -521,6 +610,7 @@ static void IsInvalidOpt(int argc, char** argv)
     for (int i = optind; i < argc; i++) {
         if (!IsTagSupported(argv[i])) {
             fprintf(stderr, "Error: \"%s\" is not support category on this device\n", argv[i]);
+            // tag is not support, exit
             exit(-1);
         }
     }
@@ -528,6 +618,7 @@ static void IsInvalidOpt(int argc, char** argv)
 
 static bool HandleOpt(int argc, char** argv)
 {
+    // handle opt
     bool isTrue = true;
     int opt = 0;
     int optionIndex = 0;
@@ -539,13 +630,14 @@ static bool HandleOpt(int argc, char** argv)
             IsInvalidOpt(argc, argv);
             break;
         }
-        isTrue = ParseOpt(opt, argv, optionIndex);
+        isTrue = ParseOpt(opt, argv, optionIndex); // parse Opt
     }
     return isTrue;
 }
 
 static bool TruncateFile(const string& path)
 {
+    // rebuild file
     int fd = creat((g_traceRootPath + path).c_str(), 0);
     if (fd == -1) {
         fprintf(stderr, "Error: clear %s, errno: %d\n", (g_traceRootPath + path).c_str(), errno);
@@ -558,11 +650,13 @@ static bool TruncateFile(const string& path)
 
 static bool ClearTrace()
 {
+    // truncate file
     return TruncateFile(TRACE_PATH);
 }
 
 static bool StartTrace()
 {
+    // set trace_on 1
     if (!SetFtraceEnabled(TRACING_ON_PATH, true)) {
         return false;
     }
@@ -574,6 +668,7 @@ static bool StartTrace()
 
 static void WaitForTraceDone(void)
 {
+    // wait for traceDone
     struct timespec ts = {0, 0};
     ts.tv_sec = g_traceDuration;
     ts.tv_nsec = 0;
@@ -587,6 +682,7 @@ static bool StopTrace()
 
 static void DumpCompressedTrace(int traceFd, int outFd)
 {
+    // dump compressedTrace
     z_stream zs { nullptr };
     int flush = Z_NO_FLUSH;
     ssize_t bytesWritten;
@@ -595,6 +691,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
         fprintf(stderr, "Error: zip stream buffer init failed\n");
         return;
     }
+    // begin deflate init
     int ret = deflateInit(&zs, Z_DEFAULT_COMPRESSION);
     if (ret != Z_OK) {
         fprintf(stderr, "Error: initializing zlib: %d\n", ret);
@@ -610,6 +707,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
     zs.avail_out = CHUNK_SIZE;
 
     do {
+        // no flush
         if (zs.avail_in == 0 && flush == Z_NO_FLUSH) {
             bytesRead = TEMP_FAILURE_RETRY(read(traceFd, in.get(), CHUNK_SIZE));
             if (bytesRead == 0) {
@@ -631,6 +729,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
             zs.next_out = reinterpret_cast<Bytef*>(out.get());
             zs.avail_out = CHUNK_SIZE;
         }
+        // deflate
         ret = deflate(&zs, flush);
         if (flush == Z_FINISH && ret == Z_STREAM_END) {
             size_t have = CHUNK_SIZE - zs.avail_out;
@@ -649,6 +748,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
         }
     } while (ret == Z_OK);
 
+    // deflate end
     ret = deflateEnd(&zs);
     if (ret != Z_OK) {
         fprintf(stderr, "error cleaning up zlib: %d\n", ret);
@@ -657,6 +757,7 @@ static void DumpCompressedTrace(int traceFd, int outFd)
 
 static void DumpTrace(int outFd, const string& path)
 {
+    // standardize file paths
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + path).c_str());
     int traceFd = open(resolvedPath.c_str(), O_RDWR);
     if (traceFd == -1) {
@@ -666,6 +767,7 @@ static void DumpTrace(int outFd, const string& path)
     ssize_t bytesWritten;
     ssize_t bytesRead;
     if (g_compress) {
+        // dump and compress trace
         DumpCompressedTrace(traceFd, outFd);
     } else {
         char buffer[BLOCK_SIZE];
@@ -677,6 +779,7 @@ static void DumpTrace(int outFd, const string& path)
             bytesWritten = TEMP_FAILURE_RETRY(write(outFd, buffer, bytesRead));
         } while (bytesWritten > 0);
     }
+    // close fd
     close(traceFd);
 }
 
@@ -684,6 +787,7 @@ static bool MarkOthersClockSync()
 {
     constexpr unsigned int bufferSize = 128; // buffer size
     char buffer[bufferSize] = { 0 };
+    // standardize file paths
     string resolvedPath = CanonicalizeSpecPath((g_traceRootPath + TRACE_MARKER_PATH).c_str());
     int fd = open(resolvedPath.c_str(), O_WRONLY);
     if (fd == -1) {
@@ -693,11 +797,11 @@ static bool MarkOthersClockSync()
 
     struct timespec mts = {0, 0};
     struct timespec rts = {0, 0};
-    if (clock_gettime(CLOCK_REALTIME, &rts) == -1) {
+    if (clock_gettime(CLOCK_REALTIME, &rts) == -1) { // get timestamp from 1970s
         fprintf(stderr, "Error: get realtime, errno: %d\n", errno);
         close(fd);
         return false;
-    } else if (clock_gettime(CLOCK_MONOTONIC, &mts) == -1) {
+    } else if (clock_gettime(CLOCK_MONOTONIC, &mts) == -1) { // get timestamp from machine startup
         fprintf(stderr, "Error: get parent_ts, errno: %d\n", errno);
         close(fd);
         return false;
@@ -708,7 +812,7 @@ static bool MarkOthersClockSync()
     int len = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1,
         "trace_event_clock_sync: realtime_ts=%" PRId64 "\n",
         static_cast<int64_t>((rts.tv_sec * nanoSeconds + rts.tv_nsec) / nanoToMill));
-    if (len < 0) {
+    if (len < 0) { // entering data into buffer error
         fprintf(stderr, "Error: entering data into buffer, errno: %d\n", errno);
         close(fd);
         return false;
@@ -719,7 +823,7 @@ static bool MarkOthersClockSync()
     }
     len = snprintf_s(buffer, sizeof(buffer), sizeof(buffer) - 1, "trace_event_clock_sync: parent_ts=%f\n",
         static_cast<float>(((static_cast<float>(mts.tv_sec)) * nanoSeconds + mts.tv_nsec) / nanoToSecond));
-    if (len < 0) {
+    if (len < 0) { // entering data into buffer error
         fprintf(stderr, "Error: entering data into buffer, errno: %d\n", errno);
         close(fd);
         return false;
@@ -734,6 +838,7 @@ static bool MarkOthersClockSync()
 
 static void InitDiskSupportTags()
 {
+    // disk support tags
     g_tagMap["disk"] = { "disk", "Disk I/O", 0, KERNEL, {
         { "events/f2fs/f2fs_sync_file_enter/enable" },
         { "events/f2fs/f2fs_sync_file_exit/enable" },
@@ -756,6 +861,7 @@ static void InitDiskSupportTags()
 
 static void InitHardwareSupportTags()
 {
+    // hardware support tags
     g_tagMap["irq"] = { "irq", "IRQ Events", 0, KERNEL, {
         { "events/irq/enable" },
         { "events/ipi/enable" },
@@ -786,6 +892,7 @@ static void InitHardwareSupportTags()
 
 static void InitCpuSupportTags()
 {
+    // cpu support tags
     g_tagMap["freq"] = { "freq", "CPU Frequency", 0, KERNEL, {
         { "events/power/cpu_frequency/enable" },
         { "events/power/clock_set_rate/enable" },
@@ -806,6 +913,7 @@ static void InitCpuSupportTags()
 
 static void InitKernelSupportTags()
 {
+    // kernel support tags
     g_tagMap["sched"] = { "sched", "CPU Scheduling", 0, KERNEL, {
         { "events/sched/sched_switch/enable" },
         { "events/sched/sched_wakeup/enable" },
@@ -816,8 +924,8 @@ static void InitKernelSupportTags()
         { "events/sched/sched_process_exit/enable" },
         { "events/cgroup/enable" },
         { "events/oom/oom_score_adj_update/enable" },
-        { "events/task/task_rename/enable" },
         { "events/task/task_newtask/enable" },
+        { "events/task/task_rename/enable" },
     }};
     g_tagMap["preemptoff"] = { "preemptoff", "Preempt-disabled code section tracing", 0, KERNEL, {
         { "events/preemptirq/preempt_enable/enable" },
@@ -830,8 +938,8 @@ static void InitKernelSupportTags()
         { "events/binder/binder_transaction_alloc_buf/enable" },
         { "events/binder/binder_set_priority/enable" },
         { "events/binder/binder_lock/enable" },
-        { "events/binder/binder_locked/enable" },
         { "events/binder/binder_unlock/enable" },
+        { "events/binder/binder_locked/enable" },
     }};
 
     g_tagMap["sync"] = { "sync", "Synchronization", 0, KERNEL, {
@@ -842,8 +950,8 @@ static void InitKernelSupportTags()
         { "events/workqueue/enable" },
     }};
     g_tagMap["memreclaim"] = { "memreclaim", "Kernel Memory Reclaim", 0, KERNEL, {
-        { "events/vmscan/mm_vmscan_direct_reclaim_begin/enable" },
         { "events/vmscan/mm_vmscan_direct_reclaim_end/enable" },
+        { "events/vmscan/mm_vmscan_direct_reclaim_begin/enable" },
         { "events/vmscan/mm_vmscan_kswapd_wake/enable" },
         { "events/vmscan/mm_vmscan_kswapd_sleep/enable" },
         { "events/lowmemorykiller/enable" },
@@ -853,8 +961,8 @@ static void InitKernelSupportTags()
     }};
     g_tagMap["memory"] = { "memory", "Memory", 0, KERNEL, {
         { "events/kmem/rss_stat/enable" },
-        { "events/kmem/ion_heap_grow/enable" },
         { "events/kmem/ion_heap_shrink/enable" },
+        { "events/kmem/ion_heap_grow/enable" },
     }};
     InitCpuSupportTags();
     InitHardwareSupportTags();
@@ -863,8 +971,8 @@ static void InitKernelSupportTags()
 static void InitAllSupportTags()
 {
     // OHOS
-    g_tagMap["ohos"] = { "ohos", "OpenHarmony", HITRACE_TAG_OHOS, USER, {}};
     g_tagMap["ability"] = { "ability", "Ability Manager", HITRACE_TAG_ABILITY_MANAGER, USER, {}};
+    g_tagMap["ohos"] = { "ohos", "OpenHarmony", HITRACE_TAG_OHOS, USER, {}};
     g_tagMap["zcamera"] = { "zcamera", "OpenHarmony Camera Module", HITRACE_TAG_ZCAMERA, USER, {}};
     g_tagMap["zmedia"] = { "zmedia", "OpenHarmony Media Module", HITRACE_TAG_ZMEDIA, USER, {}};
     g_tagMap["zimage"] = { "zimage", "OpenHarmony Image Module", HITRACE_TAG_ZIMAGE, USER, {}};
@@ -875,8 +983,8 @@ static void InitAllSupportTags()
     g_tagMap["graphic"] = { "graphic", "Graphic Module", HITRACE_TAG_GRAPHIC_AGP, USER, {}};
     g_tagMap["ace"] = { "ace", "ACE development framework", HITRACE_TAG_ACE, USER, {}};
     g_tagMap["notification"] = { "notification", "Notification Module", HITRACE_TAG_NOTIFICATION, USER, {}};
-    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
     g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module",
+    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
         HITRACE_TAG_MULTIMODALINPUT, USER, {}};
     g_tagMap["sensors"] = { "sensors", "Sensors Module", HITRACE_TAG_SENSORS, USER, {}};
     g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", HITRACE_TAG_MSDP, USER, {}};
@@ -886,8 +994,8 @@ static void InitAllSupportTags()
     g_tagMap["window"] = { "window", "Window Manager", HITRACE_TAG_WINDOW_MANAGER, USER, {}};
     g_tagMap["accessibility"] = { "accessibility", "Accessibility Manager",
         HITRACE_TAG_ACCESSIBILITY_MANAGER, USER, {}};
-    g_tagMap["account"] = { "account", "Account Manager", HITRACE_TAG_ACCOUNT_MANAGER, USER, {}};
     g_tagMap["dhfwk"] = { "dhfwk", "Distributed Hardware FWK", HITRACE_TAG_DISTRIBUTED_HARDWARE_FWK, USER, {}};
+    g_tagMap["account"] = { "account", "Account Manager", HITRACE_TAG_ACCOUNT_MANAGER, USER, {}};
     g_tagMap["daudio"] = { "daudio", "Distributed Audio", HITRACE_TAG_DISTRIBUTED_AUDIO, USER, {}};
     g_tagMap["dscreen"] = { "dscreen", "Distributed Screen", HITRACE_TAG_DISTRIBUTED_SCREEN, USER, {}};
     g_tagMap["dcamera"] = { "dcamera", "Distributed Camera", HITRACE_TAG_DISTRIBUTED_CAMERA, USER, {}};
@@ -897,8 +1005,8 @@ static void InitAllSupportTags()
     g_tagMap["dsched"] = { "dsched", "Distributed Schedule", HITRACE_TAG_DISTRIBUTED_SCHEDULE, USER, {}};
     g_tagMap["huks"] = { "huks", "Universal KeyStore", HITRACE_TAG_HUKS, USER, {}};
     g_tagMap["dlpcre"] = { "dlpcre", "Dlp Credential Service", HITRACE_TAG_DLP_CREDENTIAL, USER, {}};
-    g_tagMap["samgr"] = { "samgr", "samgr", HITRACE_TAG_SAMGR, USER, {}};
     g_tagMap["app"] = { "app", "APP Module", HITRACE_TAG_APP, USER, {}};
+    g_tagMap["samgr"] = { "samgr", "samgr", HITRACE_TAG_SAMGR, USER, {}};
     g_tagMap["zbinder"] = { "zbinder", "OpenHarmony binder communication", 0, KERNEL, {
         { "events/zbinder/enable" },
     }};
@@ -906,8 +1014,8 @@ static void InitAllSupportTags()
     g_tagMap["power"] = { "power", "Power Manager", HITRACE_TAG_POWER, USER, {}};
     g_tagMap["filemanagement"] = { "filemanagement", "filemanagement", HITRACE_TAG_FILEMANAGEMENT, USER, {}};
     g_tagMap["dslm"] = {"dslm", "device security level", HITRACE_TAG_DLSM, USER, {}};
-    g_tagMap["useriam"] = {"useriam", "useriam", HITRACE_TAG_USERIAM, USER, {}};
     g_tagMap["nweb"] = {"nweb", "NWEB Module", HITRACE_TAG_NWEB, USER, {}};
+    g_tagMap["useriam"] = {"useriam", "useriam", HITRACE_TAG_USERIAM, USER, {}};
     g_tagMap["net"] = {"net", "net", HITRACE_TAG_NET, USER, {}};
     g_tagMap["accesscontrol"] = {"accesscontrol", "Access Control Module", HITRACE_TAG_ACCESS_CONTROL, USER, {}};
     g_tagMap["interconn"] = {"interconn", "Interconnection subsystem", HITRACE_TAG_INTERCONNECTION, USER, {}};
