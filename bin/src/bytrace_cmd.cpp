@@ -415,7 +415,8 @@ inline bool StrToNum(const std::string& sString, T &tX)
     return (iStream >> tX) ? true : false;
 }
 
-static bool ParseControlOpt(int optionIndex, bool& isTrue) {
+static bool ParseControlOpt(int optionIndex, bool& isTrue)
+{
     if (!strcmp(g_longOptions[optionIndex].name, "trace_begin")) {
         g_traceStart = START_ASYNC;
         g_traceStop = false;
@@ -439,7 +440,8 @@ static bool ParseControlOpt(int optionIndex, bool& isTrue) {
     return false;
 }
 
-static bool ParseBufferSizeOpt(int optionIndex, bool& isTrue) {
+static bool ParseBufferSizeOpt(int optionIndex, bool& isTrue)
+{
     if (!strcmp(g_longOptions[optionIndex].name, "buffer_size")) {
         if (!StrToNum(optarg, g_bufferSizeKB)) {
             fprintf(stderr, "Error: buffer size is illegal input. eg: \"--buffer_size 1024\"\n");
@@ -454,7 +456,8 @@ static bool ParseBufferSizeOpt(int optionIndex, bool& isTrue) {
     return false;
 }
 
-static bool ParseTraceClockOpt(int optionIndex, bool& isTrue) {
+static bool ParseTraceClockOpt(int optionIndex, bool& isTrue)
+{
     if (!strcmp(g_longOptions[optionIndex].name, "trace_clock")) {
         regex re("[a-zA-Z]{4,6}");
         if (regex_match(optarg, re)) {
@@ -471,7 +474,8 @@ static bool ParseTraceClockOpt(int optionIndex, bool& isTrue) {
     return false;
 }
 
-static bool ParseOutputOpt(int optionIndex, bool& isTrue) {
+static bool ParseOutputOpt(int optionIndex, bool& isTrue)
+{
     if (!strcmp(g_longOptions[optionIndex].name, "output")) {
         struct stat buf;
         size_t len = strnlen(optarg, MAX_OUTPUT_LEN);
@@ -486,7 +490,8 @@ static bool ParseOutputOpt(int optionIndex, bool& isTrue) {
     return false;
 }
 
-static void ParseHelpTimeOpt(const string& cmd, int optionIndex, bool& isTrue) {
+static void ParseHelpTimeOpt(const string& cmd, int optionIndex, bool& isTrue)
+{
     if (!strcmp(g_longOptions[optionIndex].name, "help")) {
         ShowHelp(cmd);
         isTrue = false;
@@ -504,6 +509,10 @@ static void ParseHelpTimeOpt(const string& cmd, int optionIndex, bool& isTrue) {
 static void ParseLongOpt(const string& cmd, int optionIndex, bool& isTrue)
 {
     bool isFinish = ParseControlOpt(optionIndex, isTrue);
+    if (isFinish) {
+        return;
+    }
+    isFinish = ParseBufferSizeOpt(optionIndex, isTrue);
     if (isFinish) {
         return;
     }
@@ -593,11 +602,11 @@ static bool ParseOpt(int opt, char** argv, int optIndex)
     if (isFinish) {
         return isTrue;
     }
-    isFinish = ParseHlOpt(opt, argv, isTrue);
+    isFinish = ParseHltOpt(opt, argv, isTrue);
     if (isFinish) {
         return isTrue;
     }
-    isFinish = ParseOzOpt(opt, isTrue);
+    isFinish = ParseOzOpt(opt, argv, isTrue);
     if (isFinish) {
         return isTrue;
     }
@@ -984,8 +993,8 @@ static void InitAllSupportTags()
     g_tagMap["ace"] = { "ace", "ACE development framework", HITRACE_TAG_ACE, USER, {}};
     g_tagMap["notification"] = { "notification", "Notification Module", HITRACE_TAG_NOTIFICATION, USER, {}};
     g_tagMap["multimodalinput"] = { "multimodalinput", "Multimodal Input Module",
-    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
         HITRACE_TAG_MULTIMODALINPUT, USER, {}};
+    g_tagMap["misc"] = { "misc", "Misc Module", HITRACE_TAG_MISC, USER, {}};
     g_tagMap["sensors"] = { "sensors", "Sensors Module", HITRACE_TAG_SENSORS, USER, {}};
     g_tagMap["msdp"] = { "msdp", "Multimodal Sensor Data Platform", HITRACE_TAG_MSDP, USER, {}};
     g_tagMap["dsoftbus"] = { "dsoftbus", "Distributed Softbus", HITRACE_TAG_DSOFTBUS, USER, {}};
