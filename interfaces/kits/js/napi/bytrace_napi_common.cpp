@@ -55,7 +55,9 @@ bool TypeCheck(const napi_env& env, const napi_value& value, const napi_valuetyp
 
 bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
-    if (!TypeCheck(env, value, napi_string) && !TypeCheck(env, value, napi_number) && !TypeCheck(env, value, napi_undefined)) {
+    if (!TypeCheck(env, value, napi_string) && !TypeCheck(env, value, napi_number) && 
+        !TypeCheck(env, value, napi_undefined) && !TypeCheck(env, value, napi_null) && 
+        !TypeCheck(env, value, napi_boolean)) {
         return false;
     }
     constexpr int nameMaxSize = 1024;
