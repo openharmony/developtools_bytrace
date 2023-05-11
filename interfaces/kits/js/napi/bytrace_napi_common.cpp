@@ -64,7 +64,10 @@ bool ParseStringParam(const napi_env& env, const napi_value& value, std::string&
     char buf[nameMaxSize] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, value, buf, nameMaxSize, &len);
+    HiLog::Error(LABEL, "buf: %{public}s.", buf);
+    HiLog::Error(LABEL, "len: %{public}d.", len);
     dest = std::string {buf};
+    HiLog::Error(LABEL, "dest: %{public}s.", dest.c_str());
     return true;
 }
 
