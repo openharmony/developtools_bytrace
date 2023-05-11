@@ -67,28 +67,25 @@ void GetStringParam(const napi_env& env, const napi_value& value, std::string& d
 
 bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
-    if (!TypeCheck(env, value, napi_string)) {
-        if (!TypeCheck(env, value, napi_number)) {
-            if (!TypeCheck(env, value, napi_undefined)) {
-                if (!TypeCheck(env, value, napi_null)) {
-                    return false;
-                } else {
-                    dest = "null";
-                }
-            } else {
-                dest = "undefined";
-            }
-        } else {
-            int64_t destI64;
-            napi_get_value_int64(env, value, &destI64);
-            dest = std::to_string(destI64);
-        }
-    } else {
+    if (TypeCheck(env, value, napi_string)) {
         GetStringParam(env, value, dest);
+        return true;
     }
-    HiLog::Error(LABEL, "finally dest: %{public}s.", dest.c_str());
-    
-    return true;
+    if (TypeCheck(env, value, napi_number)) {
+        int64_t destI64;
+        napi_get_value_int64(env, value, &destI64);
+        dest = std::to_string(destI64);
+        return true;
+    }
+    if (TypeCheck(env, value, napi_undefined)) {
+        dest = "undefined";
+        return true;
+    }
+    if (TypeCheck(env, value, napi_null)) {
+        dest = "null";
+        return true;
+    }
+    return false;
 }
 
 bool ParseInt32Param(const napi_env& env, const napi_value& value, int& dest)
