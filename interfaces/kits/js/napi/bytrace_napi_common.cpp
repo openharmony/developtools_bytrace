@@ -53,13 +53,8 @@ bool TypeCheck(const napi_env& env, const napi_value& value, const napi_valuetyp
     return true;
 }
 
-bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
+void GetStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
-    if (!TypeCheck(env, value, napi_string) && !TypeCheck(env, value, napi_number) &&
-        !TypeCheck(env, value, napi_undefined) && !TypeCheck(env, value, napi_null) &&
-        !TypeCheck(env, value, napi_boolean)) {
-        return false;
-    }
     constexpr int nameMaxSize = 1024;
     char buf[nameMaxSize] = {0};
     size_t len = 0;
@@ -68,6 +63,31 @@ bool ParseStringParam(const napi_env& env, const napi_value& value, std::string&
     HiLog::Error(LABEL, "len: %{public}d.", len);
     dest = std::string {buf};
     HiLog::Error(LABEL, "dest: %{public}s.", dest.c_str());
+}
+
+bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
+{
+    if (!TypeCheck(env, value, napi_string)) {
+        if (!TypeCheck(env, value, napi_number)) {
+            if (!TypeCheck(env, value, napi_undefined)) {
+                if (!TypeCheck(env, value, napi_null)) {
+                    return false;
+                } else {
+                    dest = "null";
+                }
+            } else {
+                dest = "undefined";
+            }
+        } else {
+            int64_t destI64;
+            napi_get_value_int64(env, value, &destI64);
+            dest = std::to_string(destI64);
+        }
+    } else {
+        GetStringParam(env, value, dest);
+    }
+    HiLog::Error(LABEL, "finally dest: %{public}s.", dest.c_str());
+    
     return true;
 }
 
