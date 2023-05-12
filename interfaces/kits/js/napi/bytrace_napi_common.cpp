@@ -53,17 +53,39 @@ bool TypeCheck(const napi_env& env, const napi_value& value, const napi_valuetyp
     return true;
 }
 
-bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
+void GetStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
-    if (!TypeCheck(env, value, napi_string)) {
-        return false;
-    }
+    // parsing the value of string type into dest
     constexpr int nameMaxSize = 1024;
     char buf[nameMaxSize] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, value, buf, nameMaxSize, &len);
     dest = std::string {buf};
-    return true;
+}
+
+bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
+{
+    // if it is not a string, convert the corresponding type to a string
+    if (TypeCheck(env, value, napi_string)) {
+        GetStringParam(env, value, dest);
+        return true;
+    }
+    if (TypeCheck(env, value, napi_number)) {
+        int64_t destI64;
+        napi_get_value_int64(env, value, &destI64);
+        dest = std::to_string(destI64);
+        return true;
+    }
+    if (TypeCheck(env, value, napi_undefined)) {
+        dest = "undefined";
+        return true;
+    }
+    // if it's napi_null, then handle it as 'null'
+    if (TypeCheck(env, value, napi_null)) {
+        dest = "null";
+        return true;
+    }
+    return false;
 }
 
 bool ParseInt32Param(const napi_env& env, const napi_value& value, int& dest)
@@ -98,6 +120,11 @@ bool ParseUndefinedParam(const napi_env& env, const napi_value& value)
     return TypeCheck(env, value, napi_undefined);
 }
 
+bool ParseNullParam(const napi_env& env, const napi_value& value)
+{
+    return TypeCheck(env, value, napi_null);
+}
+
 bool JsStrNumParamsFunc(napi_env& env, napi_callback_info& info, STR_NUM_PARAM_FUNC nativeCall)
 {
     size_t argc = ARGC_NUMBER_TWO;
@@ -123,8 +150,8 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     size_t argc = ARGC_NUMBER_THREE;
     napi_value argv[ARGC_NUMBER_THREE];
     ParseParams(env, info, argc, argv);
-    NAPI_ASSERT(env, argc == ARGC_NUMBER_TWO || argc == ARGC_NUMBER_THREE, "Wrong number of arguments");
-    if (argc != ARGC_NUMBER_TWO && argc != ARGC_NUMBER_THREE) {
+    NAPI_ASSERT(env, argc >= ARGC_NUMBER_TWO, "Wrong number of arguments");
+    if (argc < ARGC_NUMBER_TWO) {
         HiLog::Error(LABEL, "Wrong number of parameters.");
     }
     std::string name;
@@ -139,8 +166,9 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
         StartAsyncTrace(HITRACE_TAG_APP, name, taskId);
     } else {
         double limit = 0.0;
-        if (!ParseDoubleParam(env, argv[THIRD_ARG_INDEX], limit) && !ParseUndefinedParam(env, argv[THIRD_ARG_INDEX])) {
-            HiLog::Error(LABEL, "ParseDoubleParam false and ParseUndefinedParam false.");
+        if (!ParseDoubleParam(env, argv[THIRD_ARG_INDEX], limit) && !ParseUndefinedParam(env, argv[THIRD_ARG_INDEX]) &&
+            !ParseNullParam(env, argv[THIRD_ARG_INDEX])) {
+            HiLog::Error(LABEL, "the third param is not number, not undefined, not null.");
             return nullptr;
         }
         StartAsyncTrace(HITRACE_TAG_APP, name, taskId, limit);
@@ -154,7 +182,7 @@ static napi_value JSTraceFinish(napi_env env, napi_callback_info info)
     napi_value argv[ARGC_NUMBER_TWO];
     napi_value thisVar;
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, NULL));
-    NAPI_ASSERT(env, argc == ARGC_NUMBER_TWO, "Wrong number of arguments");
+    NAPI_ASSERT(env, argc >= ARGC_NUMBER_TWO, "Wrong number of arguments");
     (void)JsStrNumParamsFunc(env, info, [&env] (std::string name, napi_value& nValue) -> bool {
         int taskId = 0;
         if (!ParseInt32Param(env, nValue, taskId)) {
