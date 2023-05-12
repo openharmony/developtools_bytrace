@@ -55,18 +55,17 @@ bool TypeCheck(const napi_env& env, const napi_value& value, const napi_valuetyp
 
 void GetStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
+    // parsing the value of string type into dest
     constexpr int nameMaxSize = 1024;
     char buf[nameMaxSize] = {0};
     size_t len = 0;
     napi_get_value_string_utf8(env, value, buf, nameMaxSize, &len);
-    HiLog::Error(LABEL, "buf: %{public}s.", buf);
-    HiLog::Error(LABEL, "len: %{public}d.", len);
     dest = std::string {buf};
-    HiLog::Error(LABEL, "dest: %{public}s.", dest.c_str());
 }
 
 bool ParseStringParam(const napi_env& env, const napi_value& value, std::string& dest)
 {
+    // if it is not a string, convert the corresponding type to a string
     if (TypeCheck(env, value, napi_string)) {
         GetStringParam(env, value, dest);
         return true;
@@ -81,6 +80,7 @@ bool ParseStringParam(const napi_env& env, const napi_value& value, std::string&
         dest = "undefined";
         return true;
     }
+    // if it's napi_null, then handle it as 'null'
     if (TypeCheck(env, value, napi_null)) {
         dest = "null";
         return true;
@@ -151,7 +151,7 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
     napi_value argv[ARGC_NUMBER_THREE];
     ParseParams(env, info, argc, argv);
     NAPI_ASSERT(env, argc >= ARGC_NUMBER_TWO, "Wrong number of arguments");
-    if (argc != ARGC_NUMBER_TWO && argc != ARGC_NUMBER_THREE) {
+    if (argc < ARGC_NUMBER_TWO) {
         HiLog::Error(LABEL, "Wrong number of parameters.");
     }
     std::string name;
