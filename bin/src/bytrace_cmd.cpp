@@ -45,7 +45,7 @@ struct option g_longOptions[] = {
     { "time",              required_argument, nullptr, 0 }, // used to specify the time (in seconds) for trace to run.
     { "trace_begin",       no_argument,       nullptr, 0 },
     { "trace_finish",      no_argument,       nullptr, 0 },
-    { "trace_finish_ndump",no_argument,       nullptr, 0 },
+    { "trace_finish_ndump",      no_argument,       nullptr, 0 },
     { "trace_dump",        no_argument,       nullptr, 0 },
     { "list_categories",   no_argument,       nullptr, 0 },
     { "overwrite",         no_argument,       nullptr, 0 },
