@@ -45,7 +45,7 @@ struct option g_longOptions[] = {
     { "time",              required_argument, nullptr, 0 }, // used to specify the time (in seconds) for trace to run.
     { "trace_begin",       no_argument,       nullptr, 0 },
     { "trace_finish",      no_argument,       nullptr, 0 },
-    { "trace_finish_ndump",      no_argument,       nullptr, 0 },
+    { "trace_finish_nodump",      no_argument,       nullptr, 0 },
     { "trace_dump",        no_argument,       nullptr, 0 },
     { "list_categories",   no_argument,       nullptr, 0 },
     { "overwrite",         no_argument,       nullptr, 0 },
@@ -398,6 +398,8 @@ static void ShowHelp(const string& cmd)
            "  --trace_begin      Starts capturing traces.\n"
            "  --trace_dump       Dumps traces to a specified path (stdout by default).\n"
            "  --trace_finish     Stops capturing traces and dumps traces to a specified path (stdout by default).\n"
+           "  --trace_finish_nodump\n"
+           "                     Stops capturing traces and not dumps traces.\n"
            "  --overwrite        Sets the action to take when the buffer is full. If this option is used,\n"
            "                     the latest traces are discarded; if this option is not used (default setting),\n"
            "                     the earliest traces are discarded.\n"
@@ -428,7 +430,7 @@ static bool ParseControlOpt(int optionIndex, bool& isTrue)
         g_traceStop = true;
         g_traceDump = true;
         return true;
-    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_finish_ndump")) {
+    } else if (!strcmp(g_longOptions[optionIndex].name, "trace_finish_nodump")) {
         g_traceStart = START_NONE;
         g_traceStop = true;
         g_traceDump = false;
