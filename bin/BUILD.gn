@@ -12,20 +12,20 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//developtools/bytrace/bytrace.gni")
+import("../bytrace.gni")
 
 config("bytrace_osal_inner_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "./include",
-    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
-  ]
+  include_dirs = [ "./include" ]
 }
 
 ohos_static_library("bytrace_osal_inner") {
   sources = [ "./src/bytrace_osal.cpp" ]
   public_configs = [ ":bytrace_osal_inner_config" ]
-  external_deps = [ "init:libbegetutil" ]
+  external_deps = [
+    "hitrace_native:hitrace_meter",
+    "init:libbegetutil",
+  ]
 
   subsystem_name = "developtools"
   part_name = "bytrace"
@@ -40,12 +40,13 @@ ohos_executable("bytrace") {
     "//third_party/zlib:libz",
   ]
 
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hitrace_native:hitrace_meter",
+  ]
 
   include_dirs = [
     "${bytrace_path}/bin/include",
-    "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
-    "//commonlibrary/c_utils/base/include",
     "//third_party/zlib",
   ]
   subsystem_name = "developtools"

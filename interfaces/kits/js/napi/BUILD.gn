@@ -12,14 +12,14 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
-import("//developtools/bytrace/bytrace.gni")
+import("../../../../bytrace.gni")
 
 ohos_shared_library("bytrace") {
   sources = [ "bytrace_napi_common.cpp" ]
-  deps = [ "//foundation/arkui/napi:ace_napi" ]
   external_deps = [
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
+    "napi:ace_napi",
   ]
 
   relative_install_dir = "module"
