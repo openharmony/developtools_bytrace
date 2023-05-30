@@ -15,6 +15,6 @@ import("//build/ohos.gni")
 
 group("jsapi_kits_target") {
   if (support_jsapi) {
-    deps = [ "//developtools/bytrace/interfaces/kits/js/napi:bytrace" ]
+    deps = [ "js/napi:bytrace" ]
   }
 }
