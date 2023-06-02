@@ -19,7 +19,7 @@
     "ram": "720KB",
     "deps": {
       "components": [
-	    "c_utils",
+        "c_utils",
         "hitrace_native",
         "hiviewdfx_hilog_native",
         "init",
