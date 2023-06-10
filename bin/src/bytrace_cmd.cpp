@@ -1037,6 +1037,8 @@ static void InitAllSupportTags()
     g_tagMap["accesscontrol"] = {"accesscontrol", "Access Control Module", HITRACE_TAG_ACCESS_CONTROL, USER, {}};
     g_tagMap["interconn"] = {"interconn", "Interconnection subsystem", HITRACE_TAG_INTERCONNECTION, USER, {}};
     g_tagMap["commonlibrary"] = {"commonlibrary", "Commonlibrary subsystem", HITRACE_TAG_COMMONLIBRARY, USER, {}};
+    g_tagMap["musl"] = {"musl", "Musl Module", HITRACE_TAG_MUSL, USER, {}};
+    g_tagMap["ffrt"] = {"ffrt", "Ffrt Tasks", HITRACE_TAG_FFRT, USER, {}};
 
     // Kernel os
     InitKernelSupportTags();
