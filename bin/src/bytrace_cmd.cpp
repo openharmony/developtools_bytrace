@@ -1124,7 +1124,7 @@ int main(int argc, char **argv)
         std::this_thread::sleep_for(std::chrono::milliseconds(WAIT_MILLISECONDS));
         isTrue = isTrue && StopTrace();
     }
-    DumpTrace();
+    DumpTrace(isTrue);
     if (g_traceStop) {
         // clear kernel setting including clock type after dump(MUST) and tracing_on is off.
         ClearKernelSpaceSettings();
