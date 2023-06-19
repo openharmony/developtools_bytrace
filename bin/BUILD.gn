@@ -23,7 +23,7 @@ ohos_static_library("bytrace_osal_inner") {
   sources = [ "./src/bytrace_osal.cpp" ]
   public_configs = [ ":bytrace_osal_inner_config" ]
   external_deps = [
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
     "init:libbegetutil",
   ]
 
@@ -42,7 +42,7 @@ ohos_executable("bytrace") {
 
   external_deps = [
     "c_utils:utils",
-    "hitrace_native:hitrace_meter",
+    "hitrace:hitrace_meter",
   ]
 
   include_dirs = [
@@ -62,7 +62,7 @@ ohos_prebuilt_etc("bytrace.cfg") {
 
 ohos_executable("bytrace_example") {
   sources = [ "example/bytrace_example.cpp" ]
-  external_deps = [ "hitrace_native:hitrace_meter" ]
+  external_deps = [ "hitrace:hitrace_meter" ]
   install_enable = false
   subsystem_name = "developtools"
   part_name = "bytrace"

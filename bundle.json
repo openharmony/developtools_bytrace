@@ -20,8 +20,8 @@
     "deps": {
       "components": [
         "c_utils",
-        "hitrace_native",
-        "hiviewdfx_hilog_native",
+        "hitrace",
+        "hilog",
         "init",
         "ipc",
         "napi"
