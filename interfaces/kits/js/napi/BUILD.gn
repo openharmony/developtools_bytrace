@@ -17,8 +17,8 @@ import("../../../../bytrace.gni")
 ohos_shared_library("bytrace") {
   sources = [ "bytrace_napi_common.cpp" ]
   external_deps = [
-    "hitrace:hitrace_meter",
     "hilog:libhilog",
+    "hitrace:hitrace_meter",
     "napi:ace_napi",
   ]
 
