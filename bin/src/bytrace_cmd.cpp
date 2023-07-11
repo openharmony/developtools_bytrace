@@ -56,6 +56,7 @@ const unsigned int CHUNK_SIZE = 65536;
 const int BLOCK_SIZE = 4096;
 const int SHELL_UID = 2000;
 const int WAIT_MILLISECONDS = 10;
+const int SAVED_CMDLINES_SIZE = 1024;
 
 const string TRACE_TAG_PROPERTY = "debug.hitrace.tags.enableflags";
 
@@ -68,6 +69,7 @@ const string CURRENT_TRACER_PATH = "current_tracer";
 const string TRACE_CLOCK_PATH = "trace_clock";
 const string OVER_WRITE_PATH = "options/overwrite";
 const string RECORD_TGID_PATH = "options/record-tgid";
+const string SAVED_CMDLINES_PATH = "saved_cmdlines_size";
 
 // support customization of some parameters
 
@@ -285,6 +287,11 @@ static bool SetTgidEnable(bool enabled)
     return SetFtraceEnabled(RECORD_TGID_PATH, enabled);
 }
 
+static bool SetCmdLinesSize(int cmdLinesSize)
+{
+    return WriteStrToFile(SAVED_CMDLINES_PATH, std::to_string(cmdLinesSize));
+}
+
 static bool DisableAllFtraceEvents()
 {
     bool isTrue = true;
@@ -348,7 +355,7 @@ static bool SetKernelSpaceSettings()
 {
     // set kernelSpace settings
     if (!(SetBufferSize(g_bufferSizeKB) && SetClock(g_clock) &&
-        SetOverWriteEnable(g_overwrite) && SetTgidEnable(true))) {
+        SetOverWriteEnable(g_overwrite) && SetTgidEnable(true) && SetCmdLinesSize(SAVED_CMDLINES_SIZE))) {
         fprintf(stderr, "Set trace kernel settings failed.\n");
         return false;
     }
