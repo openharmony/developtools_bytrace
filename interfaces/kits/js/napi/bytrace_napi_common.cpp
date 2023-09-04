@@ -166,8 +166,8 @@ static napi_value JSTraceStart(napi_env env, napi_callback_info info)
         StartAsyncTrace(HITRACE_TAG_APP, name, taskId);
     } else {
         double limit = 0.0;
-        if (!ParseDoubleParam(env, argv[THIRD_ARGC_INDEX], limit) && !ParseUndefinedParam(env, argv[THIRD_ARGC_INDEX]) &&
-            !ParseNullParam(env, argv[THIRD_ARGC_INDEX])) {
+        if (!ParseDoubleParam(env, argv[THIRD_ARGC_INDEX], limit) &&
+                !ParseUndefinedParam(env, argv[THIRD_ARGC_INDEX]) && !ParseNullParam(env, argv[THIRD_ARGC_INDEX])) {
             HiLog::Error(LABEL, "the third param is not number, not undefined, not null.");
             return nullptr;
         }
