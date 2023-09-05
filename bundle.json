@@ -19,21 +19,15 @@
     "ram": "720KB",
     "deps": {
       "components": [
-        "c_utils",
         "hitrace",
         "hilog",
         "init",
         "ipc",
         "napi"
-      ],
-      "third_party": [
-        "zlib"
       ]
     },
     "build": {
       "sub_component": [
-        "//developtools/bytrace/bin:bytrace_target",
-        "//developtools/bytrace/bin:bytrace.cfg",
         "//developtools/bytrace/interfaces/kits:jsapi_kits_target"
       ],
       "inner_kits": [
