@@ -56,6 +56,8 @@ Note:If the text contains special characters, please escape them according to th
         <filefilterlist>
             <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies" >
                 <filteritem type="filepath" name="figures/20210422-202314(WeLinkPC).png" desc="the png file for readme, the file is self-developed"/>
+                <filteritem type="filepath" name="figures/architecture_zh.png" desc="self-developed image"/>
+                <filteritem type="filepath" name="figures/architecture.png" desc="self-developed image"/>
             </filefilter>
         </filefilterlist>
     </oatconfig>
