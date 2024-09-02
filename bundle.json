@@ -18,17 +18,10 @@
     "rom": "114KB",
     "ram": "720KB",
     "deps": {
-      "components": [
-        "hitrace",
-        "hilog",
-        "init",
-        "ipc",
-        "napi"
-      ]
+      "components": []
     },
     "build": {
       "sub_component": [
-        "//developtools/bytrace/interfaces/kits:jsapi_kits_target"
       ],
       "inner_kits": [
       ]
